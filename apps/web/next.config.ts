@@ -1,7 +1,15 @@
+import createMDX from "@next/mdx"
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@workspace/ui"],
+  pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
 }
 
-export default nextConfig
+const withMDX = createMDX({
+  options: {
+    rehypePlugins: ["rehype-slug"],
+  },
+})
+
+export default withMDX(nextConfig)
