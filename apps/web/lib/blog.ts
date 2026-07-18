@@ -27,10 +27,14 @@ export async function getPostToc(slug: string): Promise<TocItem[]> {
 
     if (!match) return []
 
-    const text = stripMarkdown(match[2])
+    const hashes = match[1]
+    const heading = match[2]
+    if (!hashes || !heading) return []
+
+    const text = stripMarkdown(heading)
     if (!text) return []
 
-    return [{ id: slugger.slug(text), level: match[1].length, text }]
+    return [{ id: slugger.slug(text), level: hashes.length, text }]
   })
 }
 
