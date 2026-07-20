@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 
 import { cn } from "@workspace/ui/lib/utils"
 
@@ -11,11 +11,20 @@ interface FlickeringGridProps extends React.HTMLAttributes<HTMLDivElement> {
   color?: string
   width?: number
   height?: number
-  className?: string
   maxOpacity?: number
+  /** Maximum redraw frequency. Lower values leave more room for other animations. */
+  frameRate?: number
+  /** Limits canvas resolution on high-density displays to reduce GPU work. */
+  maxDpr?: number
 }
 
-export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
+type Grid = {
+  cols: number
+  rows: number
+  squares: Float32Array
+}
+
+export function FlickeringGrid({
   squareSize = 4,
   gridGap = 6,
   flickerChance = 0.3,
@@ -24,174 +33,203 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
   height,
   className,
   maxOpacity = 0.3,
+  frameRate = 24,
+  maxDpr = 1.25,
   ...props
-}) => {
+}: FlickeringGridProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const [isInView, setIsInView] = useState(false)
-  const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 })
-
-  const memoizedColor = useMemo(() => {
-    const toRGBA = (color: string) => {
-      if (typeof window === "undefined") {
-        return `rgba(0, 0, 0,`
-      }
-      const canvas = document.createElement("canvas")
-      canvas.width = canvas.height = 1
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return "rgba(255, 0, 0,"
-      ctx.fillStyle = color
-      ctx.fillRect(0, 0, 1, 1)
-      const [r, g, b] = Array.from(ctx.getImageData(0, 0, 1, 1).data)
-      return `rgba(${r}, ${g}, ${b},`
-    }
-    return toRGBA(color)
-  }, [color])
-
-  const setupCanvas = useCallback(
-    (canvas: HTMLCanvasElement, width: number, height: number) => {
-      const dpr = window.devicePixelRatio || 1
-      canvas.width = width * dpr
-      canvas.height = height * dpr
-      canvas.style.width = `${width}px`
-      canvas.style.height = `${height}px`
-      const cols = Math.ceil(width / (squareSize + gridGap))
-      const rows = Math.ceil(height / (squareSize + gridGap))
-
-      const squares = new Float32Array(cols * rows)
-      for (let i = 0; i < squares.length; i++) {
-        squares[i] = Math.random() * maxOpacity
-      }
-
-      return { cols, rows, squares, dpr }
-    },
-    [squareSize, gridGap, maxOpacity]
-  )
-
-  const updateSquares = useCallback(
-    (squares: Float32Array, deltaTime: number) => {
-      for (let i = 0; i < squares.length; i++) {
-        if (Math.random() < flickerChance * deltaTime) {
-          squares[i] = Math.random() * maxOpacity
-        }
-      }
-    },
-    [flickerChance, maxOpacity]
-  )
-
-  const drawGrid = useCallback(
-    (
-      ctx: CanvasRenderingContext2D,
-      width: number,
-      height: number,
-      cols: number,
-      rows: number,
-      squares: Float32Array,
-      dpr: number
-    ) => {
-      ctx.clearRect(0, 0, width, height)
-      ctx.fillStyle = "transparent"
-      ctx.fillRect(0, 0, width, height)
-
-      for (let i = 0; i < cols; i++) {
-        for (let j = 0; j < rows; j++) {
-          const opacity = squares[i * rows + j]
-          ctx.fillStyle = `${memoizedColor}${opacity})`
-          ctx.fillRect(
-            i * (squareSize + gridGap) * dpr,
-            j * (squareSize + gridGap) * dpr,
-            squareSize * dpr,
-            squareSize * dpr
-          )
-        }
-      }
-    },
-    [memoizedColor, squareSize, gridGap]
-  )
 
   useEffect(() => {
     const canvas = canvasRef.current
     const container = containerRef.current
-    const ctx = canvas?.getContext("2d") ?? null
+    const context = canvas?.getContext("2d", { alpha: true })
+    if (!canvas || !container || !context) return
+
+    const step = squareSize + gridGap
+    const frameInterval = 1000 / Math.max(1, frameRate)
+    const dpr = Math.min(window.devicePixelRatio || 1, maxDpr)
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)")
+
+    let grid: Grid | null = null
     let animationFrameId: number | null = null
-    let resizeObserver: ResizeObserver | null = null
-    let intersectionObserver: IntersectionObserver | null = null
-    let gridParams: ReturnType<typeof setupCanvas> | null = null
+    let lastFrameTime = 0
+    let isInView = false
+    let isPageVisible = !document.hidden
+    let prefersReducedMotion = reducedMotion.matches
+    let isThemeTransitionActive =
+      document.documentElement.dataset.magicuiThemeVt === "active"
 
-    if (canvas && container && ctx) {
-      const updateCanvasSize = () => {
-        const newWidth = width || container.clientWidth
-        const newHeight = height || container.clientHeight
-        setCanvasSize({ width: newWidth, height: newHeight })
-        gridParams = setupCanvas(canvas, newWidth, newHeight)
-      }
+    const drawSquare = (index: number, clear = true) => {
+      if (!grid) return
 
-      updateCanvasSize()
+      const column = Math.floor(index / grid.rows)
+      const row = index % grid.rows
+      const x = column * step
+      const y = row * step
 
-      let lastTime = 0
-      const animate = (time: number) => {
-        if (!isInView || !gridParams) return
+      if (clear) context.clearRect(x, y, squareSize, squareSize)
 
-        const deltaTime = (time - lastTime) / 1000
-        lastTime = time
-
-        updateSquares(gridParams.squares, deltaTime)
-        drawGrid(
-          ctx,
-          canvas.width,
-          canvas.height,
-          gridParams.cols,
-          gridParams.rows,
-          gridParams.squares,
-          gridParams.dpr
-        )
-        animationFrameId = requestAnimationFrame(animate)
-      }
-
-      resizeObserver = new ResizeObserver(() => {
-        updateCanvasSize()
-      })
-      resizeObserver.observe(container)
-
-      intersectionObserver = new IntersectionObserver(
-        ([entry]) => {
-          if (entry) setIsInView(entry.isIntersecting)
-        },
-        { threshold: 0 }
-      )
-      intersectionObserver.observe(canvas)
-
-      if (isInView) {
-        animationFrameId = requestAnimationFrame(animate)
-      }
+      context.globalAlpha = grid.squares[index] ?? 0
+      context.fillRect(x, y, squareSize, squareSize)
     }
 
-    return () => {
+    const drawInitialGrid = () => {
+      if (!grid) return
+
+      context.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr)
+      context.fillStyle = color
+      for (let index = 0; index < grid.squares.length; index++) {
+        drawSquare(index, false)
+      }
+      context.globalAlpha = 1
+    }
+
+    const resizeCanvas = () => {
+      const canvasWidth = width ?? container.clientWidth
+      const canvasHeight = height ?? container.clientHeight
+      if (canvasWidth <= 0 || canvasHeight <= 0) return
+
+      canvas.width = Math.floor(canvasWidth * dpr)
+      canvas.height = Math.floor(canvasHeight * dpr)
+      canvas.style.width = `${canvasWidth}px`
+      canvas.style.height = `${canvasHeight}px`
+      context.setTransform(dpr, 0, 0, dpr, 0, 0)
+
+      const cols = Math.ceil(canvasWidth / step)
+      const rows = Math.ceil(canvasHeight / step)
+      const squares = new Float32Array(cols * rows)
+      for (let index = 0; index < squares.length; index++) {
+        squares[index] = Math.random() * maxOpacity
+      }
+
+      grid = { cols, rows, squares }
+      drawInitialGrid()
+    }
+
+    const stop = () => {
       if (animationFrameId !== null) {
         cancelAnimationFrame(animationFrameId)
-      }
-      if (resizeObserver) {
-        resizeObserver.disconnect()
-      }
-      if (intersectionObserver) {
-        intersectionObserver.disconnect()
+        animationFrameId = null
       }
     }
-  }, [setupCanvas, updateSquares, drawGrid, width, height, isInView])
+
+    const canAnimate = () =>
+      isInView &&
+      isPageVisible &&
+      !prefersReducedMotion &&
+      !isThemeTransitionActive
+
+    const updateSquares = (elapsedSeconds: number) => {
+      if (!grid) return
+
+      const updates = Math.min(
+        grid.squares.length,
+        Math.round(grid.squares.length * flickerChance * elapsedSeconds)
+      )
+
+      for (let update = 0; update < updates; update++) {
+        const index = Math.floor(Math.random() * grid.squares.length)
+        if (index === undefined) continue
+
+        grid.squares[index] = Math.random() * maxOpacity
+        drawSquare(index)
+      }
+      context.globalAlpha = 1
+    }
+
+    const animate = (time: number) => {
+      if (!canAnimate()) {
+        animationFrameId = null
+        return
+      }
+
+      animationFrameId = requestAnimationFrame(animate)
+      if (time - lastFrameTime < frameInterval) return
+
+      const elapsedSeconds =
+        lastFrameTime === 0
+          ? frameInterval / 1000
+          : (time - lastFrameTime) / 1000
+      lastFrameTime = time
+      updateSquares(elapsedSeconds)
+    }
+
+    const start = () => {
+      if (!canAnimate() || animationFrameId !== null) return
+      lastFrameTime = 0
+      animationFrameId = requestAnimationFrame(animate)
+    }
+
+    const resizeObserver = new ResizeObserver(resizeCanvas)
+    const intersectionObserver = new IntersectionObserver(
+      ([entry]) => {
+        isInView = entry?.isIntersecting ?? false
+        if (isInView) start()
+        else stop()
+      },
+      { threshold: 0 }
+    )
+
+    const handleVisibilityChange = () => {
+      isPageVisible = !document.hidden
+      if (isPageVisible) start()
+      else stop()
+    }
+
+    const handleReducedMotionChange = (event: MediaQueryListEvent) => {
+      prefersReducedMotion = event.matches
+      if (prefersReducedMotion) stop()
+      else start()
+    }
+
+    const themeTransitionObserver = new MutationObserver(() => {
+      isThemeTransitionActive =
+        document.documentElement.dataset.magicuiThemeVt === "active"
+      if (isThemeTransitionActive) stop()
+      else start()
+    })
+
+    resizeCanvas()
+    resizeObserver.observe(container)
+    intersectionObserver.observe(container)
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    reducedMotion.addEventListener("change", handleReducedMotionChange)
+    themeTransitionObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-magicui-theme-vt"],
+    })
+
+    return () => {
+      stop()
+      resizeObserver.disconnect()
+      intersectionObserver.disconnect()
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      reducedMotion.removeEventListener("change", handleReducedMotionChange)
+      themeTransitionObserver.disconnect()
+    }
+  }, [
+    color,
+    flickerChance,
+    frameRate,
+    gridGap,
+    height,
+    maxDpr,
+    maxOpacity,
+    squareSize,
+    width,
+  ])
 
   return (
     <div
       ref={containerRef}
-      className={cn(`h-full w-full ${className}`)}
+      className={cn("h-full w-full", className)}
       {...props}
     >
       <canvas
         ref={canvasRef}
-        className="pointer-events-none"
-        style={{
-          width: canvasSize.width,
-          height: canvasSize.height,
-        }}
+        aria-hidden="true"
+        className="pointer-events-none block"
       />
     </div>
   )

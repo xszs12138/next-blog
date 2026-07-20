@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises"
+import { access, readFile } from "node:fs/promises"
 import path from "node:path"
 
 import GithubSlugger from "github-slugger"
@@ -9,17 +9,31 @@ export type TocItem = {
   text: string
 }
 
-const posts = ["1"] as const
+const contentDirectory = path.resolve(process.cwd(), "content")
 
-export function getPostSlugs() {
-  return posts
+function getPostPath(slug: string) {
+  const postPath = path.resolve(contentDirectory, `${slug}.mdx`)
+  const contentPrefix = `${contentDirectory}${path.sep}`
+  return postPath.startsWith(contentPrefix) ? postPath : null
+}
+
+export async function postExists(slug: string) {
+  const postPath = getPostPath(slug)
+  if (!postPath) return false
+
+  try {
+    await access(postPath)
+    return true
+  } catch {
+    return false
+  }
 }
 
 export async function getPostToc(slug: string): Promise<TocItem[]> {
-  const source = await readFile(
-    path.join(process.cwd(), "content", `${slug}.mdx`),
-    "utf8"
-  )
+  const postPath = getPostPath(slug)
+  if (!postPath) return []
+
+  const source = await readFile(postPath, "utf8")
   const slugger = new GithubSlugger()
 
   return source.split("\n").flatMap((line) => {

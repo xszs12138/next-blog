@@ -18,6 +18,7 @@
     "@workspace/ui": "workspace:*",
     "github-slugger": "^2.0.0",
     "lucide-react": "^1.25.0",
+    "motion": "^12.42.2",
     "next": "16.2.6",
     "next-themes": "^0.4.6",
     "react": "19.2.4",
