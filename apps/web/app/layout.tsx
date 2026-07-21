@@ -5,6 +5,7 @@ import "@workspace/ui/globals.css"
 import { cn } from "@workspace/ui/lib/utils"
 import { ThemeStorageSync } from "@/components/theme-storage-sync"
 import { DockMenu } from "@/lib/ui/DockMenu"
+import { PageContainer } from "@/lib/ui/PageWigets"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -20,7 +21,6 @@ export default async function RootLayout({
 }>) {
   const storedTheme = (await cookies()).get("theme")?.value
   const isDark = storedTheme === "dark"
-
   return (
     <html
       lang="en"
@@ -33,10 +33,12 @@ export default async function RootLayout({
         isDark && "dark"
       )}
     >
-      <body className="min-h-svh">
-        <ThemeStorageSync />
-        {children}
-        <DockMenu />
+      <body>
+        <PageContainer>
+          <ThemeStorageSync />
+          {children}
+          <DockMenu />
+        </PageContainer>
       </body>
     </html>
   )

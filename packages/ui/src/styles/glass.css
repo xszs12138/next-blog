@@ -1,0 +1,224 @@
+/* ── macOS Glass Card Preset ────────────────────────────────────────────
+   A collection of composable utility classes implementing macOS-style
+   glass morphism. Apply directly to any element.
+
+   Usage:
+     <div class="glass" />            ← standard glass surface
+     <div class="glass-card" />       ← glass + radius + hover lift
+     <div class="glass-strong" />     ← more opaque (sheets, modals)
+     <div class="glass-subtle" />     ← barely-there transparency
+     <div class="glass-bg glass-border rounded-xl" />  ← compose atoms
+   ────────────────────────────────────────────────────────────────────── */
+
+/* ── Design tokens (override these to customize) ─────────────────── */
+:root {
+  --glass-bg-opacity-light: 0.55;
+  --glass-bg-opacity-dark: 0.55;
+  --glass-bg-strong-opacity-light: 0.72;
+  --glass-bg-strong-opacity-dark: 0.72;
+  --glass-bg-subtle-opacity-light: 0.28;
+  --glass-bg-subtle-opacity-dark: 0.28;
+  --glass-blur: 24px;
+  --glass-blur-strong: 36px;
+  --glass-blur-subtle: 12px;
+  --glass-saturate: 2;
+  --glass-border-opacity-light: 0.22;
+  --glass-border-opacity-dark: 0.10;
+  --glass-border-strong-opacity-light: 0.35;
+  --glass-border-strong-opacity-dark: 0.16;
+  --glass-radius: 0.875rem;
+  --glass-radius-sm: 0.625rem;
+  --glass-radius-lg: 1.125rem;
+  --glass-shadow-y: 2px;
+  --glass-shadow-blur: 12px;
+  --glass-shadow-opacity-light: 0.06;
+  --glass-shadow-opacity-dark: 0.22;
+  --glass-shadow-hover-y: 8px;
+  --glass-shadow-hover-blur: 32px;
+  --glass-shadow-hover-opacity-light: 0.10;
+  --glass-shadow-hover-opacity-dark: 0.32;
+}
+
+/* ── Atomic utilities ──────────────────────────────────────────────── */
+
+/* Background + blur (no border, no shadow) */
+@utility glass-bg {
+  background: oklch(1 0 0 / var(--glass-bg-opacity-light));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur))
+    saturate(var(--glass-saturate));
+
+  .dark & {
+    background: oklch(0.28 0 0 / var(--glass-bg-opacity-dark));
+  }
+}
+
+/* Just the backdrop blur */
+@utility glass-blur {
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur))
+    saturate(var(--glass-saturate));
+}
+
+/* Glass-style subtle border */
+@utility glass-border {
+  border: 1px solid oklch(1 0 0 / var(--glass-border-opacity-light));
+
+  .dark & {
+    border-color: oklch(1 0 0 / var(--glass-border-opacity-dark));
+  }
+}
+
+/* Glass-style layered shadow */
+@utility glass-shadow {
+  box-shadow: 0 var(--glass-shadow-y) var(--glass-shadow-blur)
+      oklch(0 0 0 / var(--glass-shadow-opacity-light)),
+    0 0 0 1px oklch(0 0 0 / 0.04);
+
+  .dark & {
+    box-shadow: 0 var(--glass-shadow-y) var(--glass-shadow-blur)
+        oklch(0 0 0 / var(--glass-shadow-opacity-dark)),
+      0 0 0 1px oklch(0 0 0 / 0.12);
+  }
+}
+
+/* ── Combined utilities (one class → complete glass look) ─────────── */
+
+/* Standard glass surface: bg + blur + border + shadow */
+@utility glass {
+  background: oklch(1 0 0 / var(--glass-bg-opacity-light));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur))
+    saturate(var(--glass-saturate));
+  border: 1px solid oklch(1 0 0 / var(--glass-border-opacity-light));
+  box-shadow: 0 var(--glass-shadow-y) var(--glass-shadow-blur)
+      oklch(0 0 0 / var(--glass-shadow-opacity-light)),
+    0 0 0 1px oklch(0 0 0 / 0.04);
+
+  .dark & {
+    background: oklch(0.28 0 0 / var(--glass-bg-opacity-dark));
+    border-color: oklch(1 0 0 / var(--glass-border-opacity-dark));
+    box-shadow: 0 var(--glass-shadow-y) var(--glass-shadow-blur)
+        oklch(0 0 0 / var(--glass-shadow-opacity-dark)),
+      0 0 0 1px oklch(0 0 0 / 0.12);
+  }
+}
+
+/* Strong glass: more opaque (sheets, modals) */
+@utility glass-strong {
+  background: oklch(1 0 0 / var(--glass-bg-strong-opacity-light));
+  backdrop-filter: blur(var(--glass-blur-strong))
+    saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur-strong))
+    saturate(var(--glass-saturate));
+  border: 1px solid
+    oklch(1 0 0 / var(--glass-border-strong-opacity-light));
+  box-shadow: 0 var(--glass-shadow-y) var(--glass-shadow-blur)
+      oklch(0 0 0 / var(--glass-shadow-opacity-light)),
+    0 0 0 1px oklch(0 0 0 / 0.04);
+
+  .dark & {
+    background: oklch(0.28 0 0 / var(--glass-bg-strong-opacity-dark));
+    border-color: oklch(1 0 0 / var(--glass-border-strong-opacity-dark));
+    box-shadow: 0 var(--glass-shadow-y) var(--glass-shadow-blur)
+        oklch(0 0 0 / var(--glass-shadow-opacity-dark)),
+      0 0 0 1px oklch(0 0 0 / 0.12);
+  }
+}
+
+/* Subtle glass: barely-there transparency (tooltips, overlays) */
+@utility glass-subtle {
+  background: oklch(1 0 0 / var(--glass-bg-subtle-opacity-light));
+  backdrop-filter: blur(var(--glass-blur-subtle))
+    saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur-subtle))
+    saturate(var(--glass-saturate));
+  border: 1px solid oklch(1 0 0 / var(--glass-border-opacity-light));
+  box-shadow: 0 var(--glass-shadow-y) var(--glass-shadow-blur)
+      oklch(0 0 0 / var(--glass-shadow-opacity-light)),
+    0 0 0 1px oklch(0 0 0 / 0.04);
+
+  .dark & {
+    background: oklch(0.28 0 0 / var(--glass-bg-subtle-opacity-dark));
+    border-color: oklch(1 0 0 / var(--glass-border-opacity-dark));
+    box-shadow: 0 var(--glass-shadow-y) var(--glass-shadow-blur)
+        oklch(0 0 0 / var(--glass-shadow-opacity-dark)),
+      0 0 0 1px oklch(0 0 0 / 0.12);
+  }
+}
+
+/* Glass card: glass + radius + hover lift */
+@utility glass-card {
+  background: oklch(1 0 0 / var(--glass-bg-opacity-light));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur))
+    saturate(var(--glass-saturate));
+  border: 1px solid oklch(1 0 0 / var(--glass-border-opacity-light));
+  border-radius: var(--glass-radius);
+  box-shadow: 0 var(--glass-shadow-y) var(--glass-shadow-blur)
+      oklch(0 0 0 / var(--glass-shadow-opacity-light)),
+    0 0 0 1px oklch(0 0 0 / 0.04);
+  transition: box-shadow 0.3s ease, transform 0.3s ease,
+    border-color 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 var(--glass-shadow-hover-y) var(--glass-shadow-hover-blur)
+        oklch(0 0 0 / var(--glass-shadow-hover-opacity-light)),
+      0 0 0 1px oklch(0 0 0 / 0.06);
+    border-color: oklch(1 0 0 / var(--glass-border-strong-opacity-light));
+  }
+
+  .dark & {
+    background: oklch(0.28 0 0 / var(--glass-bg-opacity-dark));
+    border-color: oklch(1 0 0 / var(--glass-border-opacity-dark));
+    box-shadow: 0 var(--glass-shadow-y) var(--glass-shadow-blur)
+        oklch(0 0 0 / var(--glass-shadow-opacity-dark)),
+      0 0 0 1px oklch(0 0 0 / 0.12);
+
+    &:hover {
+      box-shadow: 0 var(--glass-shadow-hover-y)
+        var(--glass-shadow-hover-blur)
+        oklch(0 0 0 / var(--glass-shadow-hover-opacity-dark)),
+        0 0 0 1px oklch(0 0 0 / 0.18);
+      border-color: oklch(1 0 0 / var(--glass-border-strong-opacity-dark));
+    }
+  }
+}
+
+/* Glass surface: glass + radius, no hover */
+@utility glass-surface {
+  background: oklch(1 0 0 / var(--glass-bg-opacity-light));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur))
+    saturate(var(--glass-saturate));
+  border: 1px solid oklch(1 0 0 / var(--glass-border-opacity-light));
+  border-radius: var(--glass-radius);
+  box-shadow: 0 var(--glass-shadow-y) var(--glass-shadow-blur)
+      oklch(0 0 0 / var(--glass-shadow-opacity-light)),
+    0 0 0 1px oklch(0 0 0 / 0.04);
+
+  .dark & {
+    background: oklch(0.28 0 0 / var(--glass-bg-opacity-dark));
+    border-color: oklch(1 0 0 / var(--glass-border-opacity-dark));
+    box-shadow: 0 var(--glass-shadow-y) var(--glass-shadow-blur)
+        oklch(0 0 0 / var(--glass-shadow-opacity-dark)),
+      0 0 0 1px oklch(0 0 0 / 0.12);
+  }
+}
+
+/* ── Fallback: solid background when backdrop-filter is unsupported ─ */
+@supports not (backdrop-filter: blur(1px)) {
+  .glass,
+  .glass-strong,
+  .glass-subtle,
+  .glass-card,
+  .glass-surface,
+  .glass-bg {
+    background: oklch(1 0 0 / 0.88);
+
+    .dark & {
+      background: oklch(0.22 0 0 / 0.88);
+    }
+  }
+}

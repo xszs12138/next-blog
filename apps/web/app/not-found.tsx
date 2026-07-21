@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 
-import { MagicCard } from "@/components/magicui/magic-card"
+import { MagicCard } from "@workspace/ui/components/magic-card"
 
 export default function NotFound() {
   return (
