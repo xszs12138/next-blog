@@ -9,7 +9,9 @@ import { ThemeStorageSync } from "@/components/ThemeStorageSync"
 import { SiteHeader } from "@/components/SiteHeader"
 import { DockMenu } from "@/components/DockMenu"
 import { MobileNav } from "@/components/MobileNav"
+import { FloatingToolbar } from "@/components/FloatingToolbar"
 import { getAllPosts } from "@/lib/blog"
+import { FlickeringGrid } from "@workspace/ui/components/flickering-grid"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -48,10 +50,17 @@ export default async function RootLayout({
       )}
     >
       <body className="min-h-svh bg-background text-foreground pt-12">
+        <FlickeringGrid
+          className="fixed inset-0 -z-10"
+          color="rgb(156, 163, 175)"
+          maxOpacity={0.15}
+          flickerChance={0.1}
+        />
         <ThemeStorageSync />
         <SiteHeader />
         {children}
         <DockMenu posts={posts} />
+        <FloatingToolbar />
         <MobileNav posts={posts} />
       </body>
     </html>
