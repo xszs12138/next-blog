@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { CalendarIcon, PinIcon, SearchIcon } from "lucide-react"
+import { ArrowDownIcon, ArrowUpIcon, CalendarIcon, EyeIcon, PinIcon, SearchIcon } from "lucide-react"
 
 import type { PostMeta } from "@/lib/blog"
 import { Card } from "@workspace/ui/components/card"
@@ -16,14 +16,18 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select"
 import { cn } from "@workspace/ui/lib/utils"
+import CountUp from "@workspace/ui/components/CountUp"
 
 type BlogContentProps = {
   posts: PostMeta[]
+  views?: Record<string, number>
 }
 
-export function BlogContent({ posts }: BlogContentProps) {
+export function BlogContent({ posts, views = {} }: BlogContentProps) {
   const [query, setQuery] = useState("")
   const [selectedTag, setSelectedTag] = useState<string>("all")
+  const [sortBy, setSortBy] = useState<"date" | "views">("date")
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc")
 
   const allTags = useMemo(() => {
     const tagSet = new Set<string>()
@@ -51,12 +55,29 @@ export function BlogContent({ posts }: BlogContentProps) {
     return result
   }, [posts, query, selectedTag])
 
+  const sorted = useMemo(() => {
+    const list = [...filtered]
+    list.sort((a, b) => {
+      // Pinned always first
+      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1
+      if (sortBy === "date") {
+        const da = new Date(a.date).getTime()
+        const db = new Date(b.date).getTime()
+        return sortOrder === "desc" ? db - da : da - db
+      }
+      const va = views[a.slug] ?? 0
+      const vb = views[b.slug] ?? 0
+      return sortOrder === "desc" ? vb - va : va - vb
+    })
+    return list
+  }, [filtered, sortBy, sortOrder, views])
+
   return (
     <div>
       {/* Search + Filter */}
       <div className="mb-8 flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
-          <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <SearchIcon className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="搜索文章..."
             value={query}
@@ -64,11 +85,14 @@ export function BlogContent({ posts }: BlogContentProps) {
             className="pl-9"
           />
         </div>
-        <Select value={selectedTag} onValueChange={(v) => setSelectedTag(v ?? "all")}>
+        <Select
+          value={selectedTag}
+          onValueChange={(v) => setSelectedTag(v ?? "all")}
+        >
           <SelectTrigger className="w-full sm:w-40">
             <SelectValue placeholder="全部分类" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent side="bottom" align="start" sideOffset={6}>
             <SelectItem value="all">全部分类</SelectItem>
             {allTags.map((tag) => (
               <SelectItem key={tag} value={tag}>
@@ -79,18 +103,52 @@ export function BlogContent({ posts }: BlogContentProps) {
         </Select>
       </div>
 
+      {/* Sort */}
+      <div className="mb-6 flex items-center justify-end gap-2">
+        <button
+          onClick={() => { setSortBy("date"); setSortOrder(sortBy === "date" ? (sortOrder === "desc" ? "asc" : "desc") : "desc") }}
+          className={cn(
+            "inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs transition-colors",
+            sortBy === "date"
+              ? "border-primary/50 bg-primary/10 text-primary"
+              : "border-border bg-muted/50 text-muted-foreground hover:bg-muted"
+          )}
+        >
+          <CalendarIcon className="size-3" />
+          发布时间
+          {sortBy === "date"
+            ? (sortOrder === "desc" ? <ArrowDownIcon className="size-3" /> : <ArrowUpIcon className="size-3" />)
+            : <ArrowDownIcon className="size-3 opacity-30" />}
+        </button>
+        <button
+          onClick={() => { setSortBy("views"); setSortOrder(sortBy === "views" ? (sortOrder === "desc" ? "asc" : "desc") : "desc") }}
+          className={cn(
+            "inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs transition-colors",
+            sortBy === "views"
+              ? "border-primary/50 bg-primary/10 text-primary"
+              : "border-border bg-muted/50 text-muted-foreground hover:bg-muted"
+          )}
+        >
+          <EyeIcon className="size-3" />
+          阅读量
+          {sortBy === "views"
+            ? (sortOrder === "desc" ? <ArrowDownIcon className="size-3" /> : <ArrowUpIcon className="size-3" />)
+            : <ArrowDownIcon className="size-3 opacity-30" />}
+        </button>
+      </div>
+
       {/* Results */}
-      {filtered.length === 0 ? (
+      {sorted.length === 0 ? (
         <p className="py-12 text-center text-sm text-muted-foreground">
           未找到匹配的文章
         </p>
       ) : (
         <div className="space-y-4">
-          {filtered.map((post) => (
+          {sorted.map((post) => (
             <Link
               key={post.slug}
               href={`/blog/${post.slug}`}
-              className="block group"
+              className="group block"
             >
               <Card className="overflow-hidden transition-colors hover:bg-muted/50">
                 <div className="flex gap-2 sm:gap-4">
@@ -127,8 +185,20 @@ export function BlogContent({ posts }: BlogContentProps) {
                           置顶
                         </span>
                       )}
+                      {(() => {
+                        const v = views[post.slug]
+                        if (v && v > 0) {
+                          return (
+                            <span className="inline-flex items-center gap-1">
+                              <EyeIcon className="size-3" />
+                              <CountUp to={v} duration={0.3} />
+                            </span>
+                          )
+                        }
+                        return null
+                      })()}
                     </div>
-                    <h3 className="mt-1 font-medium group-hover:text-primary transition-colors">
+                    <h3 className="mt-1 font-medium transition-colors group-hover:text-primary">
                       {post.title}
                     </h3>
                     {post.description && (
