@@ -49,5 +49,10 @@ next-env.d.ts
 .claude/
 skills-lock.json
 
-# some qustions for ui docs 
+# some qustions for ui docs
 docs/
+
+# sqlite
+*.db
+*.db-shm
+*.db-wal

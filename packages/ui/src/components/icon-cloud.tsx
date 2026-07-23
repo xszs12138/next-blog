@@ -3,6 +3,8 @@
 import React, { useEffect, useRef, useState } from "react"
 import { renderToString } from "react-dom/server"
 
+import { PixelImage } from "@workspace/ui/components/pixel-image"
+
 interface Icon {
   x: number
   y: number
@@ -15,7 +17,7 @@ interface Icon {
 interface IconCloudProps {
   icons?: React.ReactNode[]
   images?: string[]
-  centerImage?: string
+  pixelImageSrc?: string
 }
 
 function easeOutCubic(t: number): number {
@@ -24,7 +26,7 @@ function easeOutCubic(t: number): number {
 
 const CANVAS_SIZE = 400
 
-export function IconCloud({ icons, images, centerImage }: IconCloudProps) {
+export function IconCloud({ icons, images, pixelImageSrc }: IconCloudProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [iconPositions, setIconPositions] = useState<Icon[]>([])
   const [isDragging, setIsDragging] = useState(false)
@@ -43,7 +45,6 @@ export function IconCloud({ icons, images, centerImage }: IconCloudProps) {
   const rotationRef = useRef({ x: 0, y: 0 })
   const iconCanvasesRef = useRef<HTMLCanvasElement[]>([])
   const imagesLoadedRef = useRef<boolean[]>([])
-  const centerImageRef = useRef<HTMLImageElement | null>(null)
 
   // Create icon canvases once when icons/images change
   useEffect(() => {
@@ -101,26 +102,6 @@ export function IconCloud({ icons, images, centerImage }: IconCloudProps) {
 
     iconCanvasesRef.current = newIconCanvases
   }, [icons, images])
-
-  useEffect(() => {
-    centerImageRef.current = null
-    if (!centerImage) return
-
-    let cancelled = false
-    const image = new Image()
-    image.crossOrigin = "anonymous"
-    image.src = centerImage
-    image.onload = () => {
-      if (!cancelled) {
-        centerImageRef.current = image
-      }
-    }
-
-    return () => {
-      cancelled = true
-      centerImageRef.current = null
-    }
-  }, [centerImage])
 
   // Scale the canvas backing store to the device pixel ratio for a sharp render
   useEffect(() => {
@@ -351,30 +332,6 @@ export function IconCloud({ icons, images, centerImage }: IconCloudProps) {
           .filter(({ rotatedZ }) => rotatedZ < 0)
           .forEach(drawIcon)
 
-        if (centerImageRef.current) {
-          const image = centerImageRef.current
-          const radius = 44
-          const sourceSize = Math.min(image.naturalWidth, image.naturalHeight)
-          const sourceX = (image.naturalWidth - sourceSize) / 2
-          const sourceY = (image.naturalHeight - sourceSize) / 2
-
-          ctx.save()
-          ctx.beginPath()
-          ctx.arc(centerX, centerY, radius, 0, Math.PI * 2)
-          ctx.clip()
-          ctx.drawImage(
-            image,
-            sourceX,
-            sourceY,
-            sourceSize,
-            sourceSize,
-            centerX - radius,
-            centerY - radius,
-            radius * 2,
-            radius * 2
-          )
-          ctx.restore()
-        }
 
         transformedIcons
           .filter(({ rotatedZ }) => rotatedZ >= 0)
@@ -392,7 +349,6 @@ export function IconCloud({ icons, images, centerImage }: IconCloudProps) {
       }
     }
   }, [
-    centerImage,
     icons,
     images,
     iconPositions,
@@ -402,17 +358,26 @@ export function IconCloud({ icons, images, centerImage }: IconCloudProps) {
   ])
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={400}
-      height={400}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-      className="rounded-lg"
-      aria-label="Interactive 3D Icon Cloud"
-      role="img"
-    />
+    <div className="relative inline-block">
+      {pixelImageSrc && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="size-[120px] overflow-hidden rounded-full">
+            <PixelImage src={pixelImageSrc} grid="4x6" className="!h-full !w-full [&_img]:object-cover" />
+          </div>
+        </div>
+      )}
+      <canvas
+        ref={canvasRef}
+        width={400}
+        height={400}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        className="relative z-10 rounded-lg"
+        aria-label="Interactive 3D Icon Cloud"
+        role="img"
+      />
+    </div>
   )
 }
