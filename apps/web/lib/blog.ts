@@ -1,7 +1,15 @@
-import { access, readFile } from "node:fs/promises"
+import { access, readFile, readdir } from "node:fs/promises"
 import path from "node:path"
-
+import matter from "gray-matter"
 import GithubSlugger from "github-slugger"
+
+export type PostMeta = {
+  slug: string
+  title: string
+  date: string
+  description: string
+  tags: string[]
+}
 
 export type TocItem = {
   id: string
@@ -26,6 +34,60 @@ export async function postExists(slug: string) {
     return true
   } catch {
     return false
+  }
+}
+
+/** Get all posts with frontmatter metadata, sorted by date descending */
+export async function getAllPosts(): Promise<PostMeta[]> {
+  let files: string[]
+  try {
+    files = await readdir(contentDirectory)
+  } catch {
+    return []
+  }
+
+  const mdxFiles = files.filter((f) => f.endsWith(".mdx"))
+
+  const posts = await Promise.all(
+    mdxFiles.map(async (file) => {
+      const slug = file.replace(/\.mdx$/, "")
+      const filePath = path.resolve(contentDirectory, file)
+      const source = await readFile(filePath, "utf8")
+      const { data } = matter(source)
+
+      return {
+        slug,
+        title: data.title ?? slug,
+        date: data.date ? String(data.date) : "",
+        description: data.description ?? "",
+        tags: Array.isArray(data.tags) ? data.tags : [],
+      } satisfies PostMeta
+    })
+  )
+
+  return posts
+    .filter((p) => p.date)
+    .sort((a, b) => b.date.localeCompare(a.date))
+}
+
+/** Get a single post's frontmatter metadata */
+export async function getPostMeta(slug: string): Promise<PostMeta | null> {
+  const postPath = getPostPath(slug)
+  if (!postPath) return null
+
+  try {
+    const source = await readFile(postPath, "utf8")
+    const { data } = matter(source)
+
+    return {
+      slug,
+      title: data.title ?? slug,
+      date: data.date ? String(data.date) : "",
+      description: data.description ?? "",
+      tags: Array.isArray(data.tags) ? data.tags : [],
+    }
+  } catch {
+    return null
   }
 }
 

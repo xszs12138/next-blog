@@ -1,37 +1,38 @@
-import { PageContainer } from '@/lib/ui/PageWigets'
+---
+title: "Next.js 博客开发指南"
+date: "2025-07-20"
+description: "使用 Next.js 16 和 MDX 构建个人博客的实践分享，涵盖项目结构和核心功能"
+tags:
+  - Next.js
+  - React
+  - 教程
+---
 
 ## 标题一级
 
 普通 markdown 文本
+
 - 列表1
 - 列表22222222222
 
-
-
-# 文章标题
-
 ## 第一部分
 
-
-
-// 直接写 JSX2
-<div className="bg-black p-4 text-white h-1000">
+<div className="bg-muted p-6 rounded-lg">
   <h2>内嵌组件</h2>
   <p>可以传 props、写事件</p>
 </div>
-
-export const meta = {
-  title: 'MDX示例',
-  desc: '基础用法'
-}
 
 内容……
 
 ### 细节
-<div className="bg-black p-4 text-white h-1000">
+
+<div className="bg-muted p-6 rounded-lg">
   <h2>内嵌组件</h2>
   <p>可以传 props、写事件</p>
 </div>
+
 内容……
 
 ## 第二部分
+
+构建博客时，MDX 是一个强大的工具，让你在撰写内容的同时保留 React 生态的所有能力。

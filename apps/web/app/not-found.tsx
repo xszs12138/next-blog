@@ -29,7 +29,7 @@ export default function NotFound() {
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
             <Link
-              href="/blog/1"
+              href="/blog"
               className="text-muted-foreground transition-colors hover:text-foreground"
             >
               阅读文章

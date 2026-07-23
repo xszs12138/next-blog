@@ -17,6 +17,7 @@
     "@next/mdx": "^16.2.10",
     "@workspace/ui": "workspace:*",
     "github-slugger": "^2.0.0",
+    "gray-matter": "^4.0.3",
     "lucide-react": "^1.25.0",
     "motion": "^12.42.2",
     "next": "16.2.6",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/mdx": "^2.0.14",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

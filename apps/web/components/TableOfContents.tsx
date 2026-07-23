@@ -4,7 +4,7 @@ import { type MouseEvent, useEffect, useState } from "react"
 
 import type { TocItem } from "@/lib/blog"
 import { Card } from "@workspace/ui/components/card"
-import { cn } from "@/lib/utils/tool"
+import { cn } from "@workspace/ui/lib/utils"
 
 
 type TableOfContentsProps = {
