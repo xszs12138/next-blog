@@ -17,6 +17,8 @@ import {
 const ROUTE_LABELS: Record<string, string> = {
   "/": "Home",
   "/blog": "Blog",
+  "/tools": "工具",
+  "/bangumi": "番组",
 }
 
 export function SiteHeader() {
