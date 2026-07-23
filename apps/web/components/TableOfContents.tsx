@@ -6,7 +6,6 @@ import type { TocItem } from "@/lib/blog"
 import { Card } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
 
-
 type TableOfContentsProps = {
   items: TocItem[]
 }
@@ -53,13 +52,9 @@ export function TableOfContents({ items }: TableOfContentsProps) {
 
   return (
     <div className="hidden w-64 shrink-0 xl:block">
-      <Card className="sticky top-10 rounded-2xl p-4">
-        <nav
-          aria-label="文章目录"
-        >
-          <p className="mb-5 text-sm font-semibold tracking-tight">
-            目录
-          </p>
+      <Card className="sticky top-15 rounded-2xl p-4">
+        <nav aria-label="文章目录">
+          <p className="mb-5 text-sm font-semibold tracking-tight">目录</p>
           <ol className="max-h-[calc(100svh-9rem)] space-y-1 overflow-y-auto pr-1 text-sm">
             {items.map((item) => (
               <li key={item.id}>
@@ -69,14 +64,12 @@ export function TableOfContents({ items }: TableOfContentsProps) {
                   aria-current={activeId === item.id ? "location" : undefined}
                   title={item.text}
                   style={{ paddingLeft: `${12 + (item.level - 2) * 12}px` }}
-                  className={
-                    cn(
-                      'truncate whitespace-nowrap overflow-hidden text-ellipsis!',
-                      activeId === item.id
-                        ? "relative block rounded-lg py-1 px-2  font-medium  before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-foreground"
-                        : "block truncate rounded-lg py-1 pr-2 text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground"
-                    )
-                  }
+                  className={cn(
+                    "truncate overflow-hidden text-ellipsis! whitespace-nowrap",
+                    activeId === item.id
+                      ? "relative block rounded-lg px-2 py-1 font-medium before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-foreground"
+                      : "block truncate rounded-lg py-1 pr-2 text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground"
+                  )}
                 >
                   {item.text}
                 </a>

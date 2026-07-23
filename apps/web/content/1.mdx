@@ -1,33 +1,117 @@
 ---
-title: "MDX 示例文章"
+title: "MDX 渲染测试"
 date: "2025-07-15"
-description: "这是一篇演示 MDX 基础用法的示例文章，展示如何在 Next.js 博客中使用 MDX"
+description: "这是一篇覆盖 MDX 所有渲染元素的测试文章，验证代码块、表格、图片等元素是否正常显示"
 tags:
   - MDX
   - Next.js
   - 博客
+pinned: true
+image: "https://bu.dusays.com/2026/06/16/6a3106515893d.png"
 ---
 
-## 标题一级
+## 标题层级测试
 
-普通 markdown 文本
+### 三级标题
 
-- 列表1
-- 列表2
+段落文本测试。MDX 让你在 Markdown 中直接使用 React 组件，这是它最强大的特性之一。
 
-## 第一部分
+#### 四级标题
 
-内容……
+另一个段落，用于测试段落间距和行高渲染效果。Next.js 16 的 MDX 支持非常完善。
 
-<div className="bg-muted p-6 rounded-lg">
-  <h2>内嵌组件</h2>
-  <p>MDX 支持在 markdown 中直接使用 React 组件</p>
+## 文本格式
+
+这是一段包含**粗体**、*斜体*、`行内代码` 的文本。
+
+链接测试：普通链接 [Next.js 官网](https://nextjs.org)，带图标的 <IconLink href="https://nextjs.org" icon="nextjs" />、<IconLink href="https://react.dev" icon="react" />、<IconLink href="https://github.com" icon="github" />
+
+## 列表测试
+
+### 无序列表
+
+- 第一项
+- 第二项
+  - 嵌套项 2.1
+  - 嵌套项 2.2
+- 第三项
+
+### 有序列表
+
+1. 步骤一：安装依赖
+2. 步骤二：配置项目
+3. 步骤三：启动开发服务器
+
+## 引用测试
+
+> 这是一段引用文字，用于测试 blockquote 的渲染效果。
+> 引用可以有多行，测试行间距和缩进。
+>
+> — 某位开发者
+
+## 分隔线
+
+---
+
+上面是一个水平分隔线。
+
+## 代码块测试
+
+```typescript
+import { notFound } from "next/navigation"
+
+type PageProps = {
+  params: Promise<{ slug: string }>
+}
+
+export default async function Page({ params }: PageProps) {
+  const { slug } = await params
+
+  if (!(await postExists(slug))) notFound()
+
+  const { default: Post } = await import(`@/content/${slug}.mdx`)
+
+  return <Post />
+}
+```
+
+多语言代码块：
+
+```python
+def fibonacci(n: int) -> list[int]:
+    result = [0, 1]
+    for i in range(2, n):
+        result.append(result[i-1] + result[i-2])
+    return result
+
+print(fibonacci(10))
+```
+
+## 表格测试
+
+| 属性 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `title` | `string` | 是 | 文章标题 |
+| `date` | `string` | 是 | 发布日期 |
+| `description` | `string` | 否 | 文章描述 |
+| `tags` | `string[]` | 否 | 文章标签 |
+| `draft` | `boolean` | 否 | 是否草稿，默认 false |
+
+## 内嵌组件测试
+
+<div className="bg-muted p-4 rounded-lg border border-border">
+  <p>这是一个用 JSX 渲染的自定义容器。</p>
+  <p>可以在 MDX 中直接写 HTML 标签和 React 组件。</p>
 </div>
 
-### 细节
+## 图片测试
 
-内容……
+![测试图片](https://bu.dusays.com/2025/12/05/693291b26baaf.webp)
 
-## 第二部分
+## 视频嵌入
 
-这里是文章的第二部分内容。MDX 让你可以自由混合 Markdown 和 JSX 组件。
+<BilibiliVideo bvid="BV1GJ411x7h7" title="Bilibili 视频测试" />
+
+## 总结
+
+以上覆盖了博客常用的所有 Markdown 元素，确保渲染正常。

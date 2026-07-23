@@ -6,33 +6,67 @@ tags:
   - Next.js
   - React
   - 教程
+image: "https://bu.dusays.com/2026/05/26/6a14f4c05c077.png"
 ---
 
-## 标题一级
+## 项目初始化
 
-普通 markdown 文本
+使用 Turborepo 搭建 monorepo 结构：
 
-- 列表1
-- 列表22222222222
+```bash
+pnpm create turbo@latest
+```
 
-## 第一部分
+选择合适的模板，安装依赖后即可开始开发。
 
-<div className="bg-muted p-6 rounded-lg">
-  <h2>内嵌组件</h2>
-  <p>可以传 props、写事件</p>
-</div>
+## 目录结构
 
-内容……
+```
+next-blog/
+├── apps/web/          # Next.js 博客应用
+│   ├── app/           # App Router 页面
+│   ├── components/    # 组件
+│   ├── content/       # MDX 文章
+│   └── lib/           # 工具函数
+├── packages/
+│   ├── ui/            # 共享 UI 组件库
+│   ├── eslint-config/ # ESLint 配置
+│   └── typescript-config/ # TS 配置
+└── turbo.json         # Turborepo 配置
+```
 
-### 细节
+## 技术选型
 
-<div className="bg-muted p-6 rounded-lg">
-  <h2>内嵌组件</h2>
-  <p>可以传 props、写事件</p>
-</div>
+| 技术 | 用途 |
+|------|------|
+| Next.js 16 | 框架 |
+| MDX | 内容编写 |
+| Tailwind CSS 4 | 样式 |
+| shadcn/ui | 组件库 |
+| Turborepo | 构建工具 |
+| pnpm | 包管理 |
 
-内容……
+## 核心功能
 
-## 第二部分
+### MDX 内容系统
 
-构建博客时，MDX 是一个强大的工具，让你在撰写内容的同时保留 React 生态的所有能力。
+博客使用 `@next/mdx` 处理 MDX 文件，配合 `gray-matter` 解析 frontmatter。
+
+### 主题切换
+
+使用 cookie 优先的方案，支持亮色/暗色模式，通过 `next-themes` 实现。
+
+### 目录导航
+
+自动提取文章标题生成目录，使用 `IntersectionObserver` 实现滚动高亮。
+
+## 部署
+
+项目可以部署到 Vercel 或其他支持 Next.js 的平台：
+
+> Vercel 是 Next.js 官方推荐的部署平台，支持自动 SSL、
+> 全球 CDN、Serverless Functions 等特性。
+
+## 总结
+
+构建个人博客是一个很好的学习项目，涉及前后端多个技术领域。使用 Next.js + MDX 的组合可以在保持开发体验的同时获得优秀的性能和 SEO 表现。

@@ -9,6 +9,8 @@ export type PostMeta = {
   date: string
   description: string
   tags: string[]
+  pinned: boolean
+  image?: string
 }
 
 export type TocItem = {
@@ -61,13 +63,19 @@ export async function getAllPosts(): Promise<PostMeta[]> {
         date: data.date ? String(data.date) : "",
         description: data.description ?? "",
         tags: Array.isArray(data.tags) ? data.tags : [],
+        pinned: Boolean(data.pinned),
+        image: data.image ? String(data.image) : undefined,
       } satisfies PostMeta
     })
   )
 
   return posts
     .filter((p) => p.date)
-    .sort((a, b) => b.date.localeCompare(a.date))
+    .sort((a, b) => {
+      if (a.pinned && !b.pinned) return -1
+      if (!a.pinned && b.pinned) return 1
+      return b.date.localeCompare(a.date)
+    })
 }
 
 /** Get a single post's frontmatter metadata */
@@ -85,6 +93,8 @@ export async function getPostMeta(slug: string): Promise<PostMeta | null> {
       date: data.date ? String(data.date) : "",
       description: data.description ?? "",
       tags: Array.isArray(data.tags) ? data.tags : [],
+      pinned: Boolean(data.pinned),
+      image: data.image ? String(data.image) : undefined,
     }
   } catch {
     return null

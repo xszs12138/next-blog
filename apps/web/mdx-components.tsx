@@ -1,5 +1,10 @@
 import type { MDXComponents } from "mdx/types"
-import Image from "next/image"
+import { CodeBlock } from "@/components/CodeBlock"
+import { ImagePreview } from "@/components/ImagePreview"
+import { BilibiliVideo } from "@/components/BilibiliVideo"
+import { ShareButton } from "@/components/ShareButton"
+import { LicenseNotice } from "@/components/LicenseNotice"
+import { IconLink } from "@/components/IconLink"
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
@@ -45,12 +50,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       />
     ),
     hr: (props) => <hr className="my-8 border-border" {...props} />,
-    pre: (props) => (
-      <pre
-        className="mb-4 overflow-x-auto rounded-lg border border-border bg-muted p-4 text-sm"
-        {...props}
-      />
-    ),
+    pre: (props) => <CodeBlock {...props} />,
     code: (props) => (
       <code
         className="rounded bg-muted px-1.5 py-0.5 text-sm font-mono"
@@ -72,15 +72,16 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       <td className="border border-border px-4 py-2" {...props} />
     ),
     img: (props) => (
-      <Image
-        className="my-6 rounded-lg border border-border"
-        alt={props.alt ?? ""}
+      <ImagePreview
         src={props.src ?? ""}
-        width={720}
-        height={400}
-        {...props}
+        alt={props.alt ?? ""}
+        className="my-6 rounded-lg border border-border"
       />
     ),
+    BilibiliVideo,
+    ShareButton,
+    LicenseNotice,
+    IconLink,
     ...components,
   }
 }

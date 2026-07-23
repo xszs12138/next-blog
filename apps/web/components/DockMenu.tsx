@@ -1,9 +1,10 @@
 "use client"
 
-import React from "react"
+import React, { useEffect, useState } from "react"
 import Link from "next/link"
-import { CalendarIcon, HomeIcon, MailIcon, PencilIcon } from "lucide-react"
+import { HomeIcon, MailIcon, PencilIcon, SearchIcon } from "lucide-react"
 
+import type { PostMeta } from "@/lib/blog"
 import { cn } from "@workspace/ui/lib/utils"
 import { buttonVariants } from "@workspace/ui/components/button"
 import { Separator } from "@workspace/ui/components/separator"
@@ -15,11 +16,11 @@ import {
 } from "@workspace/ui/components/tooltip"
 import { Dock, DockIcon } from "@workspace/ui/components/dock"
 import { AnimatedThemeToggler } from "@workspace/ui/components/animated-theme-toggler"
+import { PostSearch } from "@/components/PostSearch"
 
 export type IconProps = React.HTMLAttributes<SVGElement>
 
 const Icons = {
-  calendar: (props: IconProps) => <CalendarIcon {...props} />,
   email: (props: IconProps) => <MailIcon {...props} />,
   linkedin: (props: IconProps) => (
     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -93,57 +94,98 @@ const DATA = {
   },
 }
 
-export function DockMenu() {
+type DockMenuProps = {
+  posts: PostMeta[]
+}
+
+export function DockMenu({ posts }: DockMenuProps) {
+  const [searchOpen, setSearchOpen] = useState(false)
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        setSearchOpen((open) => !open)
+      }
+    }
+    document.addEventListener("keydown", down)
+    return () => document.removeEventListener("keydown", down)
+  }, [])
+
   return (
-    <div className="fixed right-0 bottom-10 left-0  ">
-      <TooltipProvider>
-        <Dock direction="middle">
-          {DATA.navbar.map((item) => (
-            <DockIcon key={item.label}>
+    <>
+      <div className="fixed right-0 bottom-4 left-0 z-50 hidden sm:block sm:bottom-10">
+        <TooltipProvider>
+          <Dock direction="middle">
+            {DATA.navbar.map((item) => (
+              <DockIcon key={item.label}>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Link
+                      href={item.href}
+                      aria-label={item.label}
+                      className={cn(
+                        buttonVariants({ variant: "ghost", size: "icon" }),
+                        "size-10 rounded-full sm:size-12"
+                      )}
+                    >
+                      <item.icon className="size-3.5 sm:size-4" />
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{item.label}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </DockIcon>
+            ))}
+            <Separator orientation="vertical" className="h-full" />
+            {/* Search */}
+            <DockIcon>
               <Tooltip>
                 <TooltipTrigger>
-                  <Link
-                    href={item.href}
-                    aria-label={item.label}
+                  <span
+                    aria-label="搜索文章"
+                    onClick={() => setSearchOpen(true)}
                     className={cn(
                       buttonVariants({ variant: "ghost", size: "icon" }),
-                      "size-12 rounded-full"
+                      "size-10 rounded-full sm:size-12 cursor-pointer"
                     )}
                   >
-                    <item.icon className="size-4" />
-                  </Link>
+                    <SearchIcon className="size-3.5 sm:size-4" />
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{item.label}</p>
+                  <p>搜索文章</p>
                 </TooltipContent>
               </Tooltip>
             </DockIcon>
-          ))}
-          <Separator orientation="vertical" className="h-full" />
-          {Object.entries(DATA.contact.social).map(([name, social]) => (
-            <DockIcon key={name}>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Link
-                    href={social.url}
-                    aria-label={social.name}
-                    className={cn(
-                      buttonVariants({ variant: "ghost", size: "icon" }),
-                      "size-12 rounded-full"
-                    )}
-                  >
-                    <social.icon className="size-4" />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{name}</p>
-                </TooltipContent>
-              </Tooltip>
-            </DockIcon>
-          ))}
-          <AnimatedThemeToggler className="cursor-pointer" />
-        </Dock>
-      </TooltipProvider>
-    </div>
+            {Object.entries(DATA.contact.social).map(([name, social]) => (
+              <DockIcon key={name}>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Link
+                      href={social.url}
+                      aria-label={social.name}
+                      className={cn(
+                        buttonVariants({ variant: "ghost", size: "icon" }),
+                        "size-10 rounded-full sm:size-12"
+                      )}
+                    >
+                      <social.icon className="size-3.5 sm:size-4" />
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{name}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </DockIcon>
+            ))}
+            <AnimatedThemeToggler className="cursor-pointer" />
+          </Dock>
+        </TooltipProvider>
+      </div>
+
+      <PostSearch posts={posts} open={searchOpen} onOpenChange={setSearchOpen} />
+    </>
   )
 }
