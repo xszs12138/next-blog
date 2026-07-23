@@ -6,6 +6,8 @@ import { CalendarIcon, PinIcon } from "lucide-react"
 import { TableOfContents } from "@/components/TableOfContents"
 import { ShareButton } from "@/components/ShareButton"
 import { LicenseNotice } from "@/components/LicenseNotice"
+import { CommentSection } from "@/components/CommentSection"
+import { ViewCounter } from "@/components/ViewCounter"
 import { getPostToc, postExists, getAllPosts, getPostMeta } from "@/lib/blog"
 
 type PageProps = {
@@ -89,6 +91,7 @@ export default async function Page({ params }: PageProps) {
                 </time>
               </div>
             )}
+            <ViewCounter slug={slug} />
             {meta?.pinned && (
               <span className="inline-flex items-center gap-0.5 text-sm text-rose-500">
                 <PinIcon className="size-3.5" />
@@ -122,6 +125,8 @@ export default async function Page({ params }: PageProps) {
           <ShareButton />
           <LicenseNotice type="cc-by-nc-sa" author="xszs" />
         </div>
+
+        <CommentSection slug={slug} />
       </article>
 
       <TableOfContents items={toc} />
