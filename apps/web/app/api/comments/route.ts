@@ -1,8 +1,29 @@
 import { auth } from "@/lib/auth"
-import { db } from "@/lib/db"
 import { headers } from "next/headers"
 import { type NextRequest, NextResponse } from "next/server"
-import { randomUUID } from "node:crypto"
+import { prisma } from "@/lib/prisma"
+
+function toCommentResponse(comment: {
+  id: string
+  postSlug: string
+  userId: string
+  userName: string
+  userImage: string | null
+  content: string
+  parentId: string | null
+  createdAt: Date
+}) {
+  return {
+    id: comment.id,
+    post_slug: comment.postSlug,
+    user_id: comment.userId,
+    user_name: comment.userName,
+    user_image: comment.userImage,
+    content: comment.content,
+    parent_id: comment.parentId,
+    created_at: comment.createdAt,
+  }
+}
 
 // GET /api/comments?slug=xxx
 export async function GET(request: NextRequest) {
@@ -11,16 +32,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "slug required" }, { status: 400 })
   }
 
-  const comments = db
-    .prepare(
-      `SELECT id, post_slug, user_id, user_name, user_image, content, parent_id, created_at
-       FROM comments
-       WHERE post_slug = ?
-       ORDER BY created_at ASC`
-    )
-    .all(slug)
+  const comments = await prisma.comment.findMany({
+    where: { postSlug: slug },
+    orderBy: { createdAt: "asc" },
+  })
 
-  return NextResponse.json(comments)
+  return NextResponse.json(comments.map(toCommentResponse))
 }
 
 // POST /api/comments — { slug, content }
@@ -35,36 +52,39 @@ export async function POST(request: NextRequest) {
 
   const { slug, content, parent_id } = await request.json()
 
-  if (!slug || !content || typeof content !== "string" || content.trim().length === 0) {
+  if (
+    !slug ||
+    !content ||
+    typeof content !== "string" ||
+    content.trim().length === 0
+  ) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 })
   }
 
   // Validate parent_id if provided
   if (parent_id) {
-    const parent = db.prepare("SELECT id, post_slug FROM comments WHERE id = ?").get(parent_id) as { id: string; post_slug: string } | undefined
-    if (!parent || parent.post_slug !== slug) {
-      return NextResponse.json({ error: "Invalid parent comment" }, { status: 400 })
+    const parent = await prisma.comment.findUnique({
+      where: { id: parent_id },
+      select: { postSlug: true },
+    })
+    if (!parent || parent.postSlug !== slug) {
+      return NextResponse.json(
+        { error: "Invalid parent comment" },
+        { status: 400 }
+      )
     }
   }
 
-  const id = randomUUID()
-  const now = new Date().toISOString()
+  const comment = await prisma.comment.create({
+    data: {
+      postSlug: slug,
+      userId: session.user.id,
+      userName: session.user.name || "Anonymous",
+      userImage: session.user.image || null,
+      content: content.trim(),
+      parentId: parent_id || null,
+    },
+  })
 
-  db.prepare(
-    `INSERT INTO comments (id, post_slug, user_id, user_name, user_image, content, parent_id, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-  ).run(
-    id,
-    slug,
-    session.user.id,
-    session.user.name || "Anonymous",
-    session.user.image || null,
-    content.trim(),
-    parent_id || null,
-    now
-  )
-
-  const comment = db.prepare("SELECT * FROM comments WHERE id = ?").get(id)
-
-  return NextResponse.json(comment, { status: 201 })
+  return NextResponse.json(toCommentResponse(comment), { status: 201 })
 }

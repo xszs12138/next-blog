@@ -3,7 +3,14 @@
 import { useMemo, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowDownIcon, ArrowUpIcon, CalendarIcon, EyeIcon, PinIcon, SearchIcon } from "lucide-react"
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  CalendarIcon,
+  EyeIcon,
+  PinIcon,
+  SearchIcon,
+} from "lucide-react"
 
 import type { PostMeta } from "@/lib/blog"
 import { Card } from "@workspace/ui/components/card"
@@ -106,7 +113,16 @@ export function BlogContent({ posts, views = {} }: BlogContentProps) {
       {/* Sort */}
       <div className="mb-6 flex items-center justify-end gap-2">
         <button
-          onClick={() => { setSortBy("date"); setSortOrder(sortBy === "date" ? (sortOrder === "desc" ? "asc" : "desc") : "desc") }}
+          onClick={() => {
+            setSortBy("date")
+            setSortOrder(
+              sortBy === "date"
+                ? sortOrder === "desc"
+                  ? "asc"
+                  : "desc"
+                : "desc"
+            )
+          }}
           className={cn(
             "inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs transition-colors",
             sortBy === "date"
@@ -116,12 +132,27 @@ export function BlogContent({ posts, views = {} }: BlogContentProps) {
         >
           <CalendarIcon className="size-3" />
           发布时间
-          {sortBy === "date"
-            ? (sortOrder === "desc" ? <ArrowDownIcon className="size-3" /> : <ArrowUpIcon className="size-3" />)
-            : <ArrowDownIcon className="size-3 opacity-30" />}
+          {sortBy === "date" ? (
+            sortOrder === "desc" ? (
+              <ArrowDownIcon className="size-3" />
+            ) : (
+              <ArrowUpIcon className="size-3" />
+            )
+          ) : (
+            <ArrowDownIcon className="size-3 opacity-30" />
+          )}
         </button>
         <button
-          onClick={() => { setSortBy("views"); setSortOrder(sortBy === "views" ? (sortOrder === "desc" ? "asc" : "desc") : "desc") }}
+          onClick={() => {
+            setSortBy("views")
+            setSortOrder(
+              sortBy === "views"
+                ? sortOrder === "desc"
+                  ? "asc"
+                  : "desc"
+                : "desc"
+            )
+          }}
           className={cn(
             "inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs transition-colors",
             sortBy === "views"
@@ -131,9 +162,15 @@ export function BlogContent({ posts, views = {} }: BlogContentProps) {
         >
           <EyeIcon className="size-3" />
           阅读量
-          {sortBy === "views"
-            ? (sortOrder === "desc" ? <ArrowDownIcon className="size-3" /> : <ArrowUpIcon className="size-3" />)
-            : <ArrowDownIcon className="size-3 opacity-30" />}
+          {sortBy === "views" ? (
+            sortOrder === "desc" ? (
+              <ArrowDownIcon className="size-3" />
+            ) : (
+              <ArrowUpIcon className="size-3" />
+            )
+          ) : (
+            <ArrowDownIcon className="size-3 opacity-30" />
+          )}
         </button>
       </div>
 
@@ -171,6 +208,12 @@ export function BlogContent({ posts, views = {} }: BlogContentProps) {
                   )}
                   <div className="flex-1 py-2 pr-3 sm:py-3 sm:pr-4">
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      {post.pinned && (
+                        <span className="inline-flex items-center gap-0.5 text-rose-500">
+                          <PinIcon className="size-3" />
+                          置顶
+                        </span>
+                      )}
                       <CalendarIcon className="size-3" />
                       <time dateTime={post.date}>
                         {new Date(post.date).toLocaleDateString("zh-CN", {
@@ -179,12 +222,6 @@ export function BlogContent({ posts, views = {} }: BlogContentProps) {
                           day: "numeric",
                         })}
                       </time>
-                      {post.pinned && (
-                        <span className="inline-flex items-center gap-0.5 text-rose-500">
-                          <PinIcon className="size-3" />
-                          置顶
-                        </span>
-                      )}
                       {(() => {
                         const v = views[post.slug]
                         if (v && v > 0) {

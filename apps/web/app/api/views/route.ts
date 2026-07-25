@@ -1,5 +1,5 @@
-import { db } from "@/lib/db"
 import { type NextRequest, NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
 
 // GET /api/views?slug=xxx
 export async function GET(request: NextRequest) {
@@ -8,9 +8,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "slug required" }, { status: 400 })
   }
 
-  const row = db
-    .prepare("SELECT count FROM page_views WHERE slug = ?")
-    .get(slug) as { count: number } | undefined
+  const row = await prisma.pageView.findUnique({
+    where: { slug },
+    select: { count: true },
+  })
 
   return NextResponse.json({ count: row?.count ?? 0 })
 }
@@ -22,14 +23,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "slug required" }, { status: 400 })
   }
 
-  db.prepare(
-    `INSERT INTO page_views (slug, count) VALUES (?, 1)
-     ON CONFLICT(slug) DO UPDATE SET count = count + 1`
-  ).run(slug)
-
-  const row = db
-    .prepare("SELECT count FROM page_views WHERE slug = ?")
-    .get(slug) as { count: number }
+  const row = await prisma.pageView.upsert({
+    where: { slug },
+    create: { slug, count: 1 },
+    update: { count: { increment: 1 } },
+    select: { count: true },
+  })
 
   return NextResponse.json({ count: row.count })
 }

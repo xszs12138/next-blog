@@ -1,8 +1,10 @@
 import type { Metadata } from "next"
 
 import { getAllPosts } from "@/lib/blog"
-import { db } from "@/lib/db"
 import { BlogContent } from "@/components/BlogContent"
+import { prisma } from "@/lib/prisma"
+
+export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -16,11 +18,10 @@ export default async function BlogPage() {
   const slugs = posts.map((p) => p.slug)
   const views: Record<string, number> = {}
   if (slugs.length > 0) {
-    const rows = db
-      .prepare(
-        `SELECT slug, count FROM page_views WHERE slug IN (${slugs.map(() => "?").join(",")})`
-      )
-      .all(...slugs) as { slug: string; count: number }[]
+    const rows = await prisma.pageView.findMany({
+      where: { slug: { in: slugs } },
+      select: { slug: true, count: true },
+    })
     for (const row of rows) {
       views[row.slug] = row.count
     }

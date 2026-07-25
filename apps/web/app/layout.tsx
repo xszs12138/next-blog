@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
 import { cookies } from "next/headers"
 
 import "@workspace/ui/globals.css"
@@ -12,13 +11,6 @@ import { MobileNav } from "@/components/MobileNav"
 import { FloatingToolbar } from "@/components/FloatingToolbar"
 import { getAllPosts } from "@/lib/blog"
 import { FlickeringGrid } from "@workspace/ui/components/flickering-grid"
-
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })
-
-const fontMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-})
 
 export const metadata: Metadata = {
   title: {
@@ -41,15 +33,9 @@ export default async function RootLayout({
     <html
       lang="zh-CN"
       suppressHydrationWarning
-      className={cn(
-        "antialiased",
-        fontMono.variable,
-        "font-sans",
-        geist.variable,
-        isDark && "dark"
-      )}
+      className={cn("antialiased", "font-sans", isDark && "dark")}
     >
-      <body className="min-h-svh bg-background text-foreground pt-12">
+      <body className="min-h-svh bg-background pt-12 text-foreground">
         <FlickeringGrid
           className="fixed inset-0 -z-10"
           color="rgb(156, 163, 175)"

@@ -3,12 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "build": "turbo build",
-    "dev": "turbo dev",
-    "lint": "turbo lint",
-    "format": "turbo format",
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "turbo run format",
     "addCom": "node scripts/addComponent.ts",
-    "typecheck": "turbo typecheck"
+    "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",

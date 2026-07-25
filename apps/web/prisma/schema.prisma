@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  comments      Comment[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String   @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  postSlug  String
+  userId    String
+  userName  String
+  userImage String?
+  content   String
+  parentId  String?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: SetNull)
+  replies   Comment[] @relation("CommentReplies")
+
+  @@index([postSlug])
+  @@index([parentId])
+  @@map("comments")
+}
+
+model PageView {
+  slug  String @id
+  count Int    @default(0)
+
+  @@map("page_views")
+}

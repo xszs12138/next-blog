@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
-import { db } from "@/lib/db"
 import { headers } from "next/headers"
+import { prisma } from "@/lib/prisma"
 
 export async function GET() {
   const session = await auth.api.getSession({
@@ -11,9 +11,10 @@ export async function GET() {
     return Response.json({ isAdmin: false })
   }
 
-  const firstUser = db
-    .prepare("SELECT id FROM user ORDER BY rowid ASC LIMIT 1")
-    .get() as { id: string } | undefined
+  const firstUser = await prisma.user.findFirst({
+    orderBy: { createdAt: "asc" },
+    select: { id: true },
+  })
 
   return Response.json({ isAdmin: firstUser?.id === session.user.id })
 }
