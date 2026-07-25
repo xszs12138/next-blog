@@ -69,11 +69,12 @@ jobs:
 
       - name: Upload and deploy
         run: |
-          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$DEPLOY_PATH'"
-          scp -P "$SSH_PORT" deploy-package.tar.gz "$SSH_USER@$SSH_HOST:'$DEPLOY_PATH/'"
+          scp -P "$SSH_PORT" deploy-package.tar.gz "$SSH_USER@$SSH_HOST:~/"
 
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "DEPLOY_PATH='$DEPLOY_PATH' bash -s" << 'REMOTE'
             set -e
+            mkdir -p "$DEPLOY_PATH"
+            mv ~/deploy-package.tar.gz "$DEPLOY_PATH/"
             cd "$DEPLOY_PATH"
 
             # Stop the app
