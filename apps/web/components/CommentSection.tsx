@@ -141,7 +141,7 @@ export function CommentSection({ slug }: { slug: string }) {
       {session ? (
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>当前用户：{session.user.name}</span>
+            <span>当前用户：{session.user?.name ?? "用户"}</span>
             <Link href="/settings" className="underline hover:text-foreground">
               编辑资料
             </Link>

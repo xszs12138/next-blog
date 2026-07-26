@@ -25,14 +25,14 @@ export function AuthButton() {
 
   return (
     <div className="flex items-center gap-2">
-      {session.user.image && (
+      {session.user?.image && (
         <img
           src={session.user.image}
           alt=""
           className="size-6 rounded-full"
         />
       )}
-      <span className="hidden text-sm sm:inline">{session.user.name}</span>
+      <span className="hidden text-sm sm:inline">{session.user?.name ?? "用户"}</span>
       <Button
         variant="ghost"
         size="sm"
