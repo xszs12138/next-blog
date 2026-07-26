@@ -14,16 +14,20 @@ export const metadata: Metadata = {
 export default async function BlogPage() {
   const posts = await getAllPosts()
 
-  // Fetch all view counts
+  // Fetch all view counts (degrade gracefully if DB is unavailable)
   const slugs = posts.map((p) => p.slug)
   const views: Record<string, number> = {}
   if (slugs.length > 0) {
-    const rows = await prisma.pageView.findMany({
-      where: { slug: { in: slugs } },
-      select: { slug: true, count: true },
-    })
-    for (const row of rows) {
-      views[row.slug] = row.count
+    try {
+      const rows = await prisma.pageView.findMany({
+        where: { slug: { in: slugs } },
+        select: { slug: true, count: true },
+      })
+      for (const row of rows) {
+        views[row.slug] = row.count
+      }
+    } catch (e) {
+      console.error("Failed to fetch view counts:", e)
     }
   }
 
