@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { cookies } from "next/headers"
+import NextTopLoader from "nextjs-toploader"
 
 import "@workspace/ui/globals.css"
 import "highlight.js/styles/github.css"
@@ -36,6 +37,12 @@ export default async function RootLayout({
       className={cn("antialiased", "font-sans", isDark && "dark")}
     >
       <body className="min-h-svh bg-background pt-12 text-foreground">
+        <NextTopLoader
+          color="#22c55e"
+          height={3}
+          showSpinner={false}
+          shadow="0 0 10px #22c55e,0 0 5px #22c55e"
+        />
         <FlickeringGrid
           className="fixed inset-0 -z-10"
           color="rgb(156, 163, 175)"

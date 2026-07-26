@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react"
 import Link from "next/link"
-import { HomeIcon, PencilIcon, SearchIcon, WrenchIcon, ClapperboardIcon } from "lucide-react"
+import { HomeIcon, PencilIcon, SearchIcon, WrenchIcon, ClapperboardIcon, ImageIcon } from "lucide-react"
 
 import type { PostMeta } from "@/lib/blog"
 import { cn } from "@workspace/ui/lib/utils"
@@ -24,6 +24,7 @@ const DATA = {
     { href: "/", icon: HomeIcon, label: "Home" },
     { href: "/blog", icon: PencilIcon, label: "Blog" },
     { href: "/tools", icon: WrenchIcon, label: "工具" },
+    { href: "/gallery", icon: ImageIcon, label: "图库" },
     { href: "/bangumi", icon: ClapperboardIcon, label: "番组" },
   ],
 }
