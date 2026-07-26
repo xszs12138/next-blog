@@ -1,4 +1,5 @@
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3"
+import { Pool } from "pg"
+import { PrismaPg } from "@prisma/adapter-pg"
 import { PrismaClient } from "@/generated/prisma/client"
 
 const globalForPrisma = globalThis as unknown as {
@@ -6,8 +7,14 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 function createPrisma(): PrismaClient {
-  const url = process.env.DATABASE_URL || "file:./data.db"
-  const adapter = new PrismaBetterSqlite3({ url })
+  const connectionString =
+    process.env.POSTGRES_PRISMA_URL ??
+    process.env.POSTGRES_URL ??
+    process.env.DATABASE_URL ??
+    "postgresql://localhost:5432/next-blog"
+
+  const pool = new Pool({ connectionString })
+  const adapter = new PrismaPg(pool)
   return new PrismaClient({ adapter })
 }
 

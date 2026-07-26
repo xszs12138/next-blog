@@ -5,7 +5,9 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   datasource: {
     url:
+      process.env.POSTGRES_PRISMA_URL ??
+      process.env.POSTGRES_URL ??
       process.env.DATABASE_URL ??
-      "file:./data.db",
+      "postgresql://localhost:5432/next-blog",
   },
 })
