@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { signIn, signUp } from "@/lib/auth-client"
+import { authErrorMessage } from "@/lib/error-codes"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
 
@@ -35,7 +36,7 @@ export function LoginForm({ mode = "signin" }: { mode?: "signin" | "signup" }) {
       router.push("/")
       router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "操作失败，请重试")
+      setError(authErrorMessage(err))
     } finally {
       setLoading(false)
     }
