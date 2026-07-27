@@ -32,11 +32,24 @@ export default async function BlogPage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 pt-8 pb-20 sm:px-6 sm:pt-16 sm:pb-24">
-      <header className="mb-8 sm:mb-10">
-        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
-          Blog
-        </h1>
+    <main className="mx-auto max-w-5xl px-4 pt-8 pb-24 sm:px-6 sm:pt-16">
+      <header className="mb-8 border-b border-border pb-7 sm:mb-10">
+        <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
+          Journal
+        </p>
+        <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              Blog
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              记录开发、设计与日常思考。
+            </p>
+          </div>
+          <span className="text-sm text-muted-foreground">
+            共 {posts.length} 篇文章
+          </span>
+        </div>
       </header>
 
       <BlogContent posts={posts} views={views} />

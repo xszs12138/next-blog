@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react"
 import Link from "next/link"
-import { HomeIcon, PencilIcon, SearchIcon, WrenchIcon, ClapperboardIcon, ImageIcon } from "lucide-react"
+import { HomeIcon, PencilIcon, SearchIcon, WrenchIcon, ClapperboardIcon, ImageIcon, PanelTopOpenIcon } from "lucide-react"
 
 import type { PostMeta } from "@/lib/blog"
 import { cn } from "@workspace/ui/lib/utils"
@@ -23,7 +23,7 @@ const DATA = {
   navbar: [
     { href: "/", icon: HomeIcon, label: "Home" },
     { href: "/blog", icon: PencilIcon, label: "Blog" },
-    { href: "/tools", icon: WrenchIcon, label: "工具" },
+    { href: "/tools", icon: WrenchIcon, label: "在线功能" },
     { href: "/gallery", icon: ImageIcon, label: "图库" },
     { href: "/bangumi", icon: ClapperboardIcon, label: "番组" },
   ],
@@ -31,13 +31,16 @@ const DATA = {
 
 type DockMenuProps = {
   posts: PostMeta[]
+  active: boolean
+  onShowHeader: () => void
 }
 
-export function DockMenu({ posts }: DockMenuProps) {
+export function DockMenu({ posts, active, onShowHeader }: DockMenuProps) {
   const [searchOpen, setSearchOpen] = useState(false)
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
+      if (!active) return
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
         setSearchOpen((open) => !open)
@@ -45,14 +48,17 @@ export function DockMenu({ posts }: DockMenuProps) {
     }
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
-  }, [])
+  }, [active])
 
   return (
     <>
       <TooltipProvider>
         <Dock
           direction="middle"
-          className="fixed right-0 bottom-4 left-0 z-50 hidden sm:flex"
+          className={cn(
+            "fixed right-0 bottom-4 left-0 z-50 hidden sm:flex",
+            !active && "!hidden"
+          )}
         >
           {DATA.navbar.map((item) => (
             <DockIcon key={item.label}>
@@ -76,6 +82,25 @@ export function DockMenu({ posts }: DockMenuProps) {
             </DockIcon>
           ))}
           <Separator orientation="vertical" className="h-full" />
+          <DockIcon>
+            <Tooltip>
+              <TooltipTrigger>
+                <span
+                  aria-label="切换到顶部菜单"
+                  onClick={onShowHeader}
+                  className={cn(
+                    buttonVariants({ variant: "ghost", size: "icon" }),
+                    "size-10 cursor-pointer rounded-full sm:size-12"
+                  )}
+                >
+                  <PanelTopOpenIcon className="size-3.5 sm:size-4" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>顶部菜单</p>
+              </TooltipContent>
+            </Tooltip>
+          </DockIcon>
           {/* Search */}
           <DockIcon>
             <Tooltip>

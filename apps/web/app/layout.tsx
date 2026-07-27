@@ -1,13 +1,11 @@
 import type { Metadata } from "next"
-import { cookies } from "next/headers"
 import NextTopLoader from "nextjs-toploader"
 
 import "@workspace/ui/globals.css"
 import "highlight.js/styles/github.css"
 import { cn } from "@workspace/ui/lib/utils"
 import { ThemeStorageSync } from "@/components/ThemeStorageSync"
-import { SiteHeader } from "@/components/SiteHeader"
-import { DockMenu } from "@/components/DockMenu"
+import { AppNavigation } from "@/components/AppNavigation"
 import { MobileNav } from "@/components/MobileNav"
 import { FloatingToolbar } from "@/components/FloatingToolbar"
 import { getAllPosts } from "@/lib/blog"
@@ -21,22 +19,36 @@ export const metadata: Metadata = {
   description: "Personal blog about tech, coding and more.",
 }
 
+const themeInitializationScript = `
+  (() => {
+    try {
+      const savedTheme = localStorage.getItem("theme")
+      const theme =
+        savedTheme === "dark" || savedTheme === "light"
+          ? savedTheme
+          : window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light"
+      document.documentElement.classList.toggle("dark", theme === "dark")
+    } catch {}
+  })()
+`
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const storedTheme = (await cookies()).get("theme")?.value
-  const isDark = storedTheme === "dark"
   const posts = await getAllPosts()
 
   return (
     <html
       lang="zh-CN"
       suppressHydrationWarning
-      className={cn("antialiased", "font-sans", isDark && "dark")}
+      className={cn("antialiased", "font-sans")}
     >
-      <body className="min-h-svh bg-background pt-12 text-foreground">
+      <body className="min-h-svh bg-background pt-14 text-foreground">
+        <script dangerouslySetInnerHTML={{ __html: themeInitializationScript }} />
         <NextTopLoader
           color="#22c55e"
           height={3}
@@ -50,11 +62,10 @@ export default async function RootLayout({
           flickerChance={0.1}
         />
         <ThemeStorageSync />
-        <SiteHeader />
+        <AppNavigation posts={posts} />
         {children}
-        <DockMenu posts={posts} />
         <FloatingToolbar />
-        <MobileNav posts={posts} />
+        <MobileNav />
       </body>
     </html>
   )

@@ -1,5 +1,8 @@
 import createMDX from "@next/mdx"
+import { createRequire } from "node:module"
 import type { NextConfig } from "next"
+
+const require = createRequire(import.meta.url)
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@workspace/ui"],
@@ -24,8 +27,16 @@ const nextConfig: NextConfig = {
 
 const withMDX = createMDX({
   options: {
-    remarkPlugins: ["remark-frontmatter", "remark-gfm"],
-    rehypePlugins: ["rehype-slug", "rehype-highlight"],
+    // Turbopack loader options must be serializable. Absolute paths also avoid
+    // resolving plugins from the loader's internal working directory.
+    remarkPlugins: [
+      require.resolve("remark-frontmatter"),
+      require.resolve("remark-gfm"),
+    ],
+    rehypePlugins: [
+      require.resolve("rehype-slug"),
+      require.resolve("rehype-highlight"),
+    ],
   },
 })
 

@@ -23,6 +23,8 @@ interface PixelImageProps {
   src: string
   grid?: PredefinedGridKey
   customGrid?: Grid
+  /** Keep the pixel slices visible after the reveal animation completes. */
+  showGrid?: boolean
   grayscaleAnimation?: boolean
   pixelFadeInDuration?: number // in ms
   maxAnimationDelay?: number // in ms
@@ -34,6 +36,7 @@ export const PixelImage = ({
   src,
   className,
   grid = "6x4",
+  showGrid = false,
   grayscaleAnimation = true,
   pixelFadeInDuration = 1000,
   maxAnimationDelay = 1200,
@@ -42,6 +45,7 @@ export const PixelImage = ({
 }: PixelImageProps) => {
   const [isVisible, setIsVisible] = useState(false)
   const [showColor, setShowColor] = useState(false)
+  const [isAnimationComplete, setIsAnimationComplete] = useState(false)
 
   const MIN_GRID = 1
   const MAX_GRID = 16
@@ -65,11 +69,26 @@ export const PixelImage = ({
 
   useEffect(() => {
     setIsVisible(true)
+    setIsAnimationComplete(false)
     const colorTimeout = setTimeout(() => {
       setShowColor(true)
     }, colorRevealDelay)
     return () => clearTimeout(colorTimeout)
   }, [colorRevealDelay])
+
+  useEffect(() => {
+    if (showGrid) return
+
+    const completionDelay = Math.max(
+      maxAnimationDelay + pixelFadeInDuration,
+      grayscaleAnimation ? colorRevealDelay + pixelFadeInDuration : 0
+    )
+    const completionTimeout = setTimeout(() => {
+      setIsAnimationComplete(true)
+    }, completionDelay)
+
+    return () => clearTimeout(completionTimeout)
+  }, [colorRevealDelay, grayscaleAnimation, maxAnimationDelay, pixelFadeInDuration, showGrid])
 
   const pieces = useMemo(() => {
     const total = rows * cols
@@ -133,6 +152,16 @@ export const PixelImage = ({
           />
         </div>
       ))}
+      {!showGrid && isAnimationComplete && (
+        <img
+          src={src}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 z-10 size-full object-cover"
+          draggable={false}
+          loading="eager"
+        />
+      )}
     </div>
   )
 }

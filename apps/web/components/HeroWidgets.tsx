@@ -29,7 +29,9 @@ export function HeroShinyText() {
     <ShinyText
       text="Gaming · Coding · Tools · All You Need"
       speed={3}
-      className="text-center text-2xl font-bold sm:text-3xl"
+      color="var(--muted-foreground)"
+      shineColor="var(--foreground)"
+      className="text-lg font-medium tracking-wide sm:text-xl"
     />
   )
 }

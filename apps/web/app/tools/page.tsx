@@ -1,117 +1,173 @@
 import type { Metadata } from "next"
-import MagicBento from "@/components/MagicBento"
+import Link from "next/link"
+import type { LucideIcon } from "lucide-react"
+import {
+  ArrowRightLeftIcon,
+  BracesIcon,
+  CloudSunIcon,
+  Code2Icon,
+  GlobeIcon,
+  ImageIcon,
+  Link2Icon,
+  MapIcon,
+  MapPinIcon,
+  PaletteIcon,
+  PenToolIcon,
+} from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "常用工具",
-  description: "常用工具软件链接合集",
+  title: "在线功能",
+  description: "无需登录、打开即可使用的在线功能集合",
 }
 
-const tools = [
+type Feature = {
+  name: string
+  description: string
+  href: string
+  icon: LucideIcon
+}
+
+type Category = {
+  name: string
+  index: string
+  icon: LucideIcon
+  features: Feature[]
+}
+
+const categories: Category[] = [
   {
-    label: "硬件检测",
-    title: "图吧工具箱",
-    description: "硬件检测、跑分、烤机一站式工具合集，装机必备",
-    href: "https://www.tbtool.cn/",
-    color: "#1a1a2e",
+    name: "开发",
+    index: "01",
+    icon: Code2Icon,
+    features: [
+      {
+        name: "JSON 对比",
+        description: "两个 JSON 逐行对比差异，新增与删除高亮标注",
+        href: "/tools/json-diff",
+        icon: ArrowRightLeftIcon,
+      },
+      {
+        name: "JSON 转 TS 类型",
+        description: "将 JSON 数据自动转换为 TypeScript interface",
+        href: "/tools/json-to-ts",
+        icon: BracesIcon,
+      },
+    ],
   },
   {
-    label: "系统优化",
-    title: "Dism++",
-    description: "Windows 系统精简优化工具，C 盘清理利器",
-    href: "https://github.com/Chuyu-Team/Dism-Multi-language",
-    color: "#16213e",
+    name: "设计与图片",
+    index: "02",
+    icon: PenToolIcon,
+    features: [
+      {
+        name: "颜色转换",
+        description: "HEX、RGB 与 HSL 的即时转换和复制",
+        href: "/tools/color",
+        icon: PaletteIcon,
+      },
+      {
+        name: "图片水印",
+        description: "给图片添加可调位置、颜色与透明度的文字水印",
+        href: "/tools/watermark",
+        icon: ImageIcon,
+      },
+    ],
   },
   {
-    label: "组件库",
-    title: "Ant Design Vue Next",
-    description: "Vue 3 企业级 UI 组件库，Ant Design 官方 Vue 版",
-    href: "https://next.antdv.com/",
-    color: "#0f3460",
+    name: "网络与生活",
+    index: "03",
+    icon: GlobeIcon,
+    features: [
+      {
+        name: "IP 地址查询",
+        description: "查询 IP 的地理位置和运营商等信息",
+        href: "/tools/ip-lookup",
+        icon: MapPinIcon,
+      },
+      {
+        name: "地图定位",
+        description: "输入经纬度坐标，在地图中显示位置",
+        href: "/tools/map",
+        icon: MapIcon,
+      },
+      {
+        name: "天气查询",
+        description: "查询城市天气、温度、风速与湿度",
+        href: "/tools/weather",
+        icon: CloudSunIcon,
+      },
+    ],
   },
   {
-    label: "组件库",
-    title: "shadcn/ui",
-    description: "复制粘贴式组件库，支持 React / Vue，2025 最火 UI 方案",
-    href: "https://ui.shadcn.com/",
-    color: "#1a1a2e",
-  },
-  {
-    label: "文件搜索",
-    title: "Everything",
-    description: "Windows 文件搜索神器，秒级全盘检索，远超系统自带",
-    href: "https://www.voidtools.com/",
-    color: "#16213e",
-  },
-  {
-    label: "图标",
-    title: "Lucide",
-    description: "开源 SVG 图标库，轻量美观，shadcn/ui 默认图标集",
-    href: "https://lucide.dev/",
-    color: "#0f3460",
-  },
-  {
-    label: "笔记",
-    title: "Obsidian",
-    description: "本地 Markdown 笔记软件，双链 + 图谱，知识管理利器",
-    href: "https://obsidian.md/",
-    color: "#1a1a2e",
-  },
-  {
-    label: "动画库",
-    title: "Magic UI",
-    description: "动画组件库，与 shadcn/ui 完美搭配，开箱即用",
-    href: "https://magicui.design/",
-    color: "#16213e",
-  },
-  {
-    label: "部署",
-    title: "Vercel",
-    description: "前端部署平台，Next.js 官方推荐，Git 推送自动部署",
-    href: "https://vercel.com/",
-    color: "#0f3460",
-  },
-  {
-    label: "截图",
-    title: "Snipaste",
-    description: "截图 + 贴图工具，支持取色、标注、贴图置顶",
-    href: "https://www.snipaste.com/",
-    color: "#1a1a2e",
-  },
-  {
-    label: "压缩",
-    title: "7-Zip",
-    description: "开源免费压缩解压工具，支持几乎所有压缩格式",
-    href: "https://www.7-zip.org/",
-    color: "#16213e",
-  },
-  {
-    label: "U 盘",
-    title: "Rufus",
-    description: "U 盘启动盘制作工具，轻量免费，装机必备",
-    href: "https://rufus.ie/",
-    color: "#0f3460",
+    name: "网站链接",
+    index: "04",
+    icon: Link2Icon,
+    features: [
+      {
+        name: "常用工具网站链接",
+        description: "系统维护、开发与创作时常用的网站、软件与服务",
+        href: "/tools/websites",
+        icon: Link2Icon,
+      },
+    ],
   },
 ]
 
 export default function ToolsPage() {
   return (
-    <main className="mx-auto max-w-6xl px-4 pt-8 pb-20 sm:px-6 sm:pt-16 sm:pb-24">
-      <div className="mb-8 sm:mb-12">
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-          常用工具
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          收录日常开发和使用中常用的工具、软件、组件库链接，持续更新
+    <main className="mx-auto max-w-4xl px-4 pt-8 pb-24 sm:px-6 sm:pt-16">
+      <header className="mb-10 border-b border-border pb-7 sm:mb-12">
+        <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
+          Utilities
         </p>
+        <div className="mt-3">
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+            在线功能
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            不依赖登录，打开即可使用的小功能集合。
+          </p>
+        </div>
+      </header>
+
+      <div className="space-y-10 sm:space-y-12">
+        {categories.map((category) => (
+          <section
+            key={category.name}
+            aria-labelledby={`feature-${category.index}`}
+          >
+            <div className="mb-4 flex items-center gap-3">
+              <span className="text-xs font-medium tracking-[0.14em] text-muted-foreground">
+                {category.index}
+              </span>
+              <category.icon className="size-4 text-muted-foreground" />
+              <h2 id={`feature-${category.index}`} className="font-medium">
+                {category.name}
+              </h2>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {category.features.map((feature) => (
+                <Link
+                  key={feature.href}
+                  href={feature.href}
+                  className="group rounded-xl border border-border bg-background/45 p-5 transition-colors duration-300 hover:bg-muted/45"
+                >
+                  <feature.icon className="size-5 text-muted-foreground" />
+                  <div className="mt-5 flex items-center justify-between gap-3">
+                    <h3 className="font-medium">{feature.name}</h3>
+                    <span className="text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5">
+                      →
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    {feature.description}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
-      <MagicBento
-        cards={tools}
-        enableStars
-        enableBorderGlow
-        enableSpotlight
-        clickEffect
-        glowColor="0, 200, 120"
-      />
     </main>
   )
 }

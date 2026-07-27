@@ -2,9 +2,14 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { AnimatedThemeToggler } from "@workspace/ui/components/animated-theme-toggler"
-import { Button } from "@workspace/ui/components/button"
+import { Button, buttonVariants } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 import { ChevronUpIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
+
+const floatingButtonClassName = cn(
+  buttonVariants({ variant: "outline", size: "icon" }),
+  "size-9 rounded-full shadow-md transition-all duration-300"
+)
 
 export function FloatingToolbar() {
   const [collapsed, setCollapsed] = useState(false)
@@ -33,7 +38,7 @@ export function FloatingToolbar() {
           variant="outline"
           size="icon"
           className={cn(
-            "size-9 rounded-full shadow-md transition-all duration-300",
+            floatingButtonClassName,
             showTop ? "scale-100 opacity-100" : "pointer-events-none scale-0 opacity-0"
           )}
           onClick={scrollToTop}
@@ -41,15 +46,16 @@ export function FloatingToolbar() {
           <ChevronUpIcon className="size-4" />
         </Button>
 
-        <div className="flex size-9 items-center justify-center rounded-full border bg-background shadow-md">
-          <AnimatedThemeToggler />
-        </div>
+        <AnimatedThemeToggler
+          aria-label="切换主题"
+          className={floatingButtonClassName}
+        />
       </div>
 
       <Button
         variant="outline"
         size="icon"
-        className="size-9 rounded-full shadow-md"
+        className={floatingButtonClassName}
         onClick={() => setCollapsed(!collapsed)}
       >
         {collapsed ? (
