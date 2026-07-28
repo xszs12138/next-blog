@@ -10,14 +10,15 @@ import { AppNavigation } from "@/components/AppNavigation"
 import { MobileNav } from "@/components/MobileNav"
 import { FloatingToolbar } from "@/components/FloatingToolbar"
 import { getAllPosts } from "@/lib/blog"
+import { getAllMovies } from "@/lib/movies"
 import { FlickeringGrid } from "@workspace/ui/components/flickering-grid"
 
 export const metadata: Metadata = {
   title: {
-    default: "Home",
-    template: "%s | Home",
+    default: "首页",
+    template: "%s | 个人主页",
   },
-  description: "Personal blog about tech, coding and more.",
+  description: "关于代码、游戏与日常工具的个人笔记。",
 }
 
 const themeInitializationScript = `
@@ -40,7 +41,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const posts = await getAllPosts()
+  const [posts, movies] = await Promise.all([getAllPosts(), getAllMovies()])
+  const movieTitles = movies.map(({ slug, title }) => ({ slug, title }))
 
   return (
     <html
@@ -67,7 +69,7 @@ export default async function RootLayout({
           flickerChance={0.1}
         />
         <ThemeStorageSync />
-        <AppNavigation posts={posts} />
+        <AppNavigation posts={posts} movieTitles={movieTitles} />
         {children}
         <FloatingToolbar />
         <MobileNav />

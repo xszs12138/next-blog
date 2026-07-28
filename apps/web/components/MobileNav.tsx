@@ -22,7 +22,7 @@ export function MobileNav() {
     <>
       <div className="fixed top-1.5 right-4 z-50 sm:hidden">
         <Button
-          variant="outline"
+          // variant="outline"
           size="icon"
           className="size-11 rounded-full shadow-md"
           onClick={() => setOpen(true)}

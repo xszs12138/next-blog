@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { ImageOffIcon } from "lucide-react"
 
 import { cn } from "@workspace/ui/lib/utils"
 
@@ -46,6 +47,7 @@ export const PixelImage = ({
   const [isVisible, setIsVisible] = useState(false)
   const [showColor, setShowColor] = useState(false)
   const [isAnimationComplete, setIsAnimationComplete] = useState(false)
+  const [imageStatus, setImageStatus] = useState<"loading" | "loaded" | "error">("loading")
 
   const MIN_GRID = 1
   const MAX_GRID = 16
@@ -68,16 +70,33 @@ export const PixelImage = ({
   }, [customGrid, grid])
 
   useEffect(() => {
+    setImageStatus("loading")
+    const image = new window.Image()
+
+    image.onload = () => setImageStatus("loaded")
+    image.onerror = () => setImageStatus("error")
+    image.src = src
+
+    return () => {
+      image.onload = null
+      image.onerror = null
+    }
+  }, [src])
+
+  useEffect(() => {
+    if (imageStatus !== "loaded") return
+
     setIsVisible(true)
+    setShowColor(false)
     setIsAnimationComplete(false)
     const colorTimeout = setTimeout(() => {
       setShowColor(true)
     }, colorRevealDelay)
     return () => clearTimeout(colorTimeout)
-  }, [colorRevealDelay])
+  }, [colorRevealDelay, imageStatus])
 
   useEffect(() => {
-    if (showGrid) return
+    if (imageStatus !== "loaded" || showGrid) return
 
     const completionDelay = Math.max(
       maxAnimationDelay + pixelFadeInDuration,
@@ -88,7 +107,7 @@ export const PixelImage = ({
     }, completionDelay)
 
     return () => clearTimeout(completionTimeout)
-  }, [colorRevealDelay, grayscaleAnimation, maxAnimationDelay, pixelFadeInDuration, showGrid])
+  }, [colorRevealDelay, grayscaleAnimation, imageStatus, maxAnimationDelay, pixelFadeInDuration, showGrid])
 
   const pieces = useMemo(() => {
     const total = rows * cols
@@ -122,46 +141,59 @@ export const PixelImage = ({
 
   return (
     <div className={cn("relative select-none", className)}>
-      {randomizedPieces.map((piece, index) => (
+      {imageStatus === "loading" ? (
+        <div aria-hidden="true" className="absolute inset-0 animate-pulse bg-muted" />
+      ) : null}
+      {imageStatus === "error" ? (
         <div
-          key={index}
-          className={cn(
-            "absolute inset-0 transition-all ease-out",
-            isVisible ? "opacity-100" : "opacity-0"
-          )}
-          style={{
-            clipPath: piece.clipPath,
-            transitionDelay: `${piece.delay}ms`,
-            transitionDuration: `${pixelFadeInDuration}ms`,
-          }}
+          role="img"
+          aria-label="图片加载失败"
+          className="absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground"
         >
-          <img
-            src={src}
-            alt={`Pixel image piece ${index + 1}`}
-            className={cn(
-              "z-1 object-cover",
-              grayscaleAnimation && (showColor ? "grayscale-0" : "grayscale")
-            )}
-            style={{
-              transition: grayscaleAnimation
-                ? `filter ${pixelFadeInDuration}ms cubic-bezier(0.4, 0, 0.2, 1)`
-                : "none",
-            }}
-            draggable={false}
-            loading="eager"
-          />
+          <ImageOffIcon aria-hidden="true" className="size-1/4 max-h-10 max-w-10" />
         </div>
-      ))}
-      {!showGrid && isAnimationComplete && (
+      ) : null}
+      {imageStatus === "loaded"
+        ? randomizedPieces.map((piece, index) => (
+            <div
+              key={index}
+              className={cn(
+                "absolute inset-0 transition-all ease-out",
+                isVisible ? "opacity-100" : "opacity-0"
+              )}
+              style={{
+                clipPath: piece.clipPath,
+                transitionDelay: `${piece.delay}ms`,
+                transitionDuration: `${pixelFadeInDuration}ms`,
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={src}
+                alt={`Pixel image piece ${index + 1}`}
+                className={cn(
+                  "z-1 object-cover",
+                  grayscaleAnimation && (showColor ? "grayscale-0" : "grayscale")
+                )}
+                style={{
+                  transition: grayscaleAnimation
+                    ? `filter ${pixelFadeInDuration}ms cubic-bezier(0.4, 0, 0.2, 1)`
+                    : "none",
+                }}
+                draggable={false}
+              />
+            </div>
+          ))
+        : null}
+      {imageStatus === "loaded" && !showGrid && isAnimationComplete ? (
         <img
           src={src}
           alt=""
           aria-hidden="true"
           className="absolute inset-0 z-10 size-full object-cover"
           draggable={false}
-          loading="eager"
         />
-      )}
+      ) : null}
     </div>
   )
 }

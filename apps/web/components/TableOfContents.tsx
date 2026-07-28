@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 
-import type { TocItem } from "@/lib/blog"
+import type { TocItem } from "@/lib/blog-types"
 import { Card } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
 

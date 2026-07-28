@@ -34,6 +34,7 @@ const categoryIcons: Record<ToolCategoryId, LucideIcon> = {
 }
 
 const featureIcons: Record<ToolFeature["href"], LucideIcon> = {
+  "/tools/code-comparison": Code2Icon,
   "/tools/json-diff": ArrowRightLeftIcon,
   "/tools/json-to-ts": BracesIcon,
   "/tools/color": PaletteIcon,
@@ -46,19 +47,11 @@ const featureIcons: Record<ToolFeature["href"], LucideIcon> = {
 
 export default function ToolsPage() {
   return (
-    <main className="mx-auto max-w-4xl px-4 pt-8 pb-24 sm:px-6 sm:pt-16">
+    <main className="mx-auto max-w-4xl px-4 pt-8 pb-11 sm:px-6">
       <header className="mb-10 border-b border-border pb-7 sm:mb-12">
-        <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
-          Utilities
-        </p>
-        <div className="mt-3">
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            在线功能
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            不依赖登录，打开即可使用的小功能集合。
-          </p>
-        </div>
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+          在线功能
+        </h1>
       </header>
 
       <div className="space-y-10 sm:space-y-12">
@@ -69,44 +62,44 @@ export default function ToolsPage() {
           )
 
           return (
-          <section
-            key={category.name}
-            aria-labelledby={`feature-${category.index}`}
-          >
-            <div className="mb-4 flex items-center gap-3">
-              <span className="text-xs font-medium tracking-[0.14em] text-muted-foreground">
-                {category.index}
-              </span>
-              <CategoryIcon className="size-4 text-muted-foreground" />
-              <h2 id={`feature-${category.index}`} className="font-medium">
-                {category.name}
-              </h2>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {features.map((feature) => {
-                const FeatureIcon = featureIcons[feature.href]
+            <section
+              key={category.name}
+              aria-labelledby={`feature-${category.index}`}
+            >
+              <div className="mb-4 flex items-center gap-3">
+                <span className="text-xs font-medium tracking-[0.14em] text-muted-foreground">
+                  {category.index}
+                </span>
+                <CategoryIcon className="size-4 text-muted-foreground" />
+                <h2 id={`feature-${category.index}`} className="font-medium">
+                  {category.name}
+                </h2>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {features.map((feature) => {
+                  const FeatureIcon = featureIcons[feature.href]
 
-                return (
-                  <Link
-                    key={feature.href}
-                    href={feature.href}
-                    className="group rounded-xl border border-border bg-background/45 p-5 transition-colors duration-300 hover:bg-muted/45"
-                  >
-                    <FeatureIcon className="size-5 text-muted-foreground" />
-                    <div className="mt-5 flex items-center justify-between gap-3">
-                      <h3 className="font-medium">{feature.name}</h3>
-                      <span className="text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5">
-                        →
-                      </span>
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                      {feature.description}
-                    </p>
-                  </Link>
-                )
-              })}
-            </div>
-          </section>
+                  return (
+                    <Link
+                      key={feature.href}
+                      href={feature.href}
+                      className="group rounded-xl border border-border bg-background/45 p-5 transition-colors duration-300 hover:bg-muted/45"
+                    >
+                      <FeatureIcon className="size-5 text-muted-foreground" />
+                      <div className="mt-5 flex items-center justify-between gap-3">
+                        <h3 className="font-medium">{feature.name}</h3>
+                        <span className="text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5">
+                          →
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                        {feature.description}
+                      </p>
+                    </Link>
+                  )
+                })}
+              </div>
+            </section>
           )
         })}
       </div>

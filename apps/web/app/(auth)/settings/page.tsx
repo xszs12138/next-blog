@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useSession, authClient } from "@/lib/auth-client"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
+import { NativeImageWithFallback } from "@/components/ImageWithFallback"
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -65,10 +66,11 @@ export default function SettingsPage() {
       {/* Avatar preview */}
       {image && (
         <div className="flex justify-center">
-          <img
+          <NativeImageWithFallback
             src={image}
-            alt="Preview"
-            className="size-20 rounded-full object-cover ring-2 ring-border"
+            alt="头像预览"
+            containerClassName="size-20 rounded-full ring-2 ring-border"
+            className="size-20 rounded-full object-cover"
           />
         </div>
       )}

@@ -2,6 +2,7 @@ import Link from "next/link"
 import { ClapperboardIcon, ExternalLinkIcon, StarIcon } from "lucide-react"
 
 import type { BangumiCollections } from "@/lib/bangumi"
+import { NativeImageWithFallback } from "@/components/ImageWithFallback"
 
 const TYPE_LABELS: Record<number, string> = {
   1: "想看",
@@ -48,10 +49,11 @@ export function BangumiWidget({ collections }: { collections: BangumiCollections
             className="group flex gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/50"
           >
             <div className="relative shrink-0">
-              <img
+              <NativeImageWithFallback
                 src={item.subject.images.medium}
                 alt={item.subject.name_cn || item.subject.name}
-                className="h-32 w-24 rounded-md object-cover"
+                containerClassName="h-32 w-24 rounded-md"
+                className="size-full object-cover"
                 loading="lazy"
               />
               <span

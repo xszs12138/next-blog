@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react"
 
-import type { PostMeta } from "@/lib/blog"
+import type { PostMeta } from "@/lib/blog-types"
+import type { MovieNavigationItem } from "@/lib/movie-types"
 import { DockMenu } from "@/components/DockMenu"
 import { SiteHeader } from "@/components/SiteHeader"
 
@@ -10,9 +11,10 @@ type NavigationMode = "header" | "dock"
 
 type AppNavigationProps = {
   posts: PostMeta[]
+  movieTitles: MovieNavigationItem[]
 }
 
-export function AppNavigation({ posts }: AppNavigationProps) {
+export function AppNavigation({ posts, movieTitles }: AppNavigationProps) {
   const [mode, setMode] = useState<NavigationMode>("header")
   const [preferencesLoaded, setPreferencesLoaded] = useState(false)
 
@@ -33,6 +35,7 @@ export function AppNavigation({ posts }: AppNavigationProps) {
     <>
       <SiteHeader
         posts={posts}
+        movieTitles={movieTitles}
         mode={mode}
         onModeChange={setMode}
       />

@@ -9,12 +9,8 @@ import { ShareButton } from "@/components/ShareButton"
 import { LicenseNotice } from "@/components/LicenseNotice"
 import { CommentSection } from "@/components/CommentSection"
 import { ViewCounter } from "@/components/ViewCounter"
-import {
-  formatPostDate,
-  getAllPosts,
-  getPostMeta,
-  getPostToc,
-} from "@/lib/blog"
+import { getAllPosts, getPostMeta, getPostToc } from "@/lib/blog"
+import { formatPostDate } from "@/lib/post-date"
 
 type PageProps = {
   params: Promise<{ slug: string }>

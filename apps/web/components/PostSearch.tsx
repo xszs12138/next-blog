@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { SearchIcon } from "lucide-react"
 
-import type { PostMeta } from "@/lib/blog"
+import type { PostMeta } from "@/lib/blog-types"
 import {
   Command,
   CommandDialog,

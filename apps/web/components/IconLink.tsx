@@ -1,5 +1,6 @@
 import Link from "next/link"
-import Image from "next/image"
+
+import { ImageWithFallback } from "@/components/ImageWithFallback"
 
 const PRESETS: Record<string, { icon: string; label: string }> = {
   nextjs: {
@@ -56,12 +57,13 @@ export function IconLink({ href, icon, children }: IconLinkProps) {
   const content = (
     <span className="inline-flex items-center gap-2 rounded-sm border border-border/60 bg-muted/30 px-2 py-1 text-sm font-medium transition-colors hover:bg-muted/60">
       {iconSrc && (
-        <Image
+        <ImageWithFallback
           src={iconSrc}
           alt=""
           width={16}
           height={16}
           unoptimized
+          containerClassName="size-4 shrink-0 rounded-sm"
           className="size-4 shrink-0 rounded-sm"
         />
       )}

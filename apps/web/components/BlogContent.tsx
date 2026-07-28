@@ -1,7 +1,6 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import {
   ArrowDownIcon,
@@ -15,7 +14,8 @@ import {
   SearchIcon,
 } from "lucide-react"
 
-import { formatPostDate, type PostMeta } from "@/lib/blog"
+import type { PostMeta } from "@/lib/blog-types"
+import { formatPostDate } from "@/lib/post-date"
 import { Card } from "@workspace/ui/components/card"
 import CountUp from "@workspace/ui/components/CountUp"
 import { Input } from "@workspace/ui/components/input"
@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select"
 import { cn } from "@workspace/ui/lib/utils"
+import { ImageWithFallback } from "@/components/ImageWithFallback"
 
 type BlogContentProps = {
   posts: PostMeta[]
@@ -263,11 +264,12 @@ export function BlogContent({ posts, views = {} }: BlogContentProps) {
               <Card className="h-full gap-0 p-0 transition-colors duration-300 hover:bg-muted/45">
                 {post.image ? (
                   <div className="relative aspect-[16/9] overflow-hidden border-b border-border">
-                    <Image
+                    <ImageWithFallback
                       src={post.image}
                       alt={post.title}
                       fill
                       unoptimized
+                      containerClassName="absolute inset-0"
                       sizes="(min-width: 768px) 50vw, 100vw"
                       className="object-cover transition-transform duration-500 group-hover:scale-[1.025]"
                     />
@@ -304,11 +306,12 @@ export function BlogContent({ posts, views = {} }: BlogContentProps) {
                 <div className="flex min-h-36">
                   {post.image ? (
                     <div className="relative hidden w-44 shrink-0 overflow-hidden border-r border-border sm:block">
-                      <Image
+                      <ImageWithFallback
                         src={post.image}
                         alt=""
                         fill
                         unoptimized
+                        containerClassName="absolute inset-0"
                         sizes="11rem"
                         className="object-cover transition-transform duration-500 group-hover:scale-[1.025]"
                       />

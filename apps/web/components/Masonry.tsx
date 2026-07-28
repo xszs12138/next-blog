@@ -2,6 +2,7 @@
 
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+import { ImageOffIcon } from 'lucide-react';
 
 const useMedia = (queries: string[], values: number[], defaultValue: number): number => {
   const get = () => {
@@ -38,17 +39,20 @@ const useMeasure = <T extends HTMLElement>() => {
   return [ref, size] as const;
 };
 
-const preloadImages = async (urls: string[]): Promise<void> => {
-  await Promise.all(
+const preloadImages = async (urls: string[]): Promise<Set<string>> => {
+  const results = await Promise.all(
     urls.map(
       src =>
-        new Promise<void>(resolve => {
+        new Promise<{ src: string; failed: boolean }>(resolve => {
           const img = new Image();
+          img.onload = () => resolve({ src, failed: false });
+          img.onerror = () => resolve({ src, failed: true });
           img.src = src;
-          img.onload = img.onerror = () => resolve();
         })
     )
   );
+
+  return new Set(results.filter(result => result.failed).map(result => result.src));
 };
 
 interface Item {
@@ -98,6 +102,7 @@ const Masonry: React.FC<MasonryProps> = ({
 
   const [containerRef, { width }] = useMeasure<HTMLDivElement>();
   const [imagesReady, setImagesReady] = useState(false);
+  const [failedImages, setFailedImages] = useState<Set<string>>(() => new Set());
 
   const getInitialPosition = (item: GridItem) => {
     const containerRect = containerRef.current?.getBoundingClientRect();
@@ -129,7 +134,19 @@ const Masonry: React.FC<MasonryProps> = ({
   };
 
   useEffect(() => {
-    preloadImages(items.map(i => i.img)).then(() => setImagesReady(true));
+    let isCurrent = true;
+    setImagesReady(false);
+    setFailedImages(new Set());
+
+    preloadImages(items.map(i => i.img)).then(failed => {
+      if (!isCurrent) return;
+      setFailedImages(failed);
+      setImagesReady(true);
+    });
+
+    return () => {
+      isCurrent = false;
+    };
   }, [items]);
 
   const grid = useMemo<GridItem[]>(() => {
@@ -228,19 +245,39 @@ const Masonry: React.FC<MasonryProps> = ({
           key={item.id}
           data-key={item.id}
           className="absolute box-content"
-          style={{ willChange: 'transform, width, height, opacity' }}
+          style={{
+            willChange: 'transform, width, height, opacity',
+            ...(!imagesReady && {
+              transform: `translate(${item.x}px, ${item.y}px)`,
+              width: item.w,
+              height: item.h,
+              opacity: 1,
+            }),
+          }}
           onClick={() => onItemClick?.(item)}
           onMouseEnter={e => handleMouseEnter(item.id, e.currentTarget)}
           onMouseLeave={e => handleMouseLeave(item.id, e.currentTarget)}
         >
-          <div
-            className="relative w-full h-full bg-cover bg-center rounded-[10px] shadow-[0px_10px_50px_-10px_rgba(0,0,0,0.2)] uppercase text-[10px] leading-[10px]"
-            style={{ backgroundImage: `url(${item.img})` }}
-          >
-            {colorShiftOnHover && (
-              <div className="color-overlay absolute inset-0 rounded-[10px] bg-gradient-to-tr from-pink-500/50 to-sky-500/50 opacity-0 pointer-events-none" />
-            )}
-          </div>
+          {!imagesReady ? (
+            <div aria-hidden="true" className="size-full animate-pulse rounded-[10px] bg-muted" />
+          ) : failedImages.has(item.img) ? (
+            <div
+              role="img"
+              aria-label="图片加载失败"
+              className="flex size-full items-center justify-center rounded-[10px] bg-muted text-muted-foreground"
+            >
+              <ImageOffIcon aria-hidden="true" className="size-8" />
+            </div>
+          ) : (
+            <div
+              className="relative h-full w-full rounded-[10px] bg-cover bg-center text-[10px] leading-[10px] uppercase shadow-[0px_10px_50px_-10px_rgba(0,0,0,0.2)]"
+              style={{ backgroundImage: `url(${item.img})` }}
+            >
+              {colorShiftOnHover && (
+                <div className="color-overlay pointer-events-none absolute inset-0 rounded-[10px] bg-gradient-to-tr from-pink-500/50 to-sky-500/50 opacity-0" />
+              )}
+            </div>
+          )}
         </div>
       ))}
     </div>

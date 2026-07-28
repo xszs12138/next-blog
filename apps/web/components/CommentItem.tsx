@@ -6,6 +6,8 @@ import { Button } from "@workspace/ui/components/button"
 import { Textarea } from "@workspace/ui/components/textarea"
 import Link from "next/link"
 
+import { NativeImageWithFallback } from "@/components/ImageWithFallback"
+
 export interface Comment {
   id: string
   post_slug: string
@@ -74,13 +76,14 @@ export function CommentItem({
   return (
     <div>
       <div className="flex gap-3 rounded-lg border p-4">
-        <img
+        <NativeImageWithFallback
           src={
             comment.user_image ||
             `https://avatar.vercel.sh/${comment.user_name}?size=40`
           }
           alt={comment.user_name}
-          className="size-10 rounded-full"
+          containerClassName="size-10 rounded-full"
+          className="size-10 rounded-full object-cover"
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">

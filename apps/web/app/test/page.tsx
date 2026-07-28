@@ -7,7 +7,7 @@ const Lanyard = dynamic(() => import("@workspace/ui/components/Lanyard"), {
   ssr: false,
   loading: () => (
     <div className="flex h-svh items-center justify-center text-muted-foreground">
-      Loading 3D...
+      正在加载 3D 内容…
     </div>
   ),
 })
@@ -18,7 +18,7 @@ export default function TestPage() {
       <Suspense
         fallback={
           <div className="flex h-svh items-center justify-center text-muted-foreground">
-            Loading...
+            正在加载…
           </div>
         }
       >

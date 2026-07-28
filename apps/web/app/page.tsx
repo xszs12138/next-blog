@@ -10,8 +10,8 @@ import {
 import { HeroCloud, HeroShinyText } from "@/components/HeroWidgets"
 
 export const metadata: Metadata = {
-  title: "Home",
-  description: "Personal blog about tech, coding and more.",
+  title: "首页",
+  description: "关于代码、游戏与日常工具的个人笔记。",
 }
 
 export default function Page() {
@@ -30,7 +30,7 @@ export default function Page() {
         <div className="order-2 text-center lg:order-1 lg:text-left">
           <div className="inline-flex items-center gap-2 border-y border-border/80 py-2 text-[0.65rem] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
             <span className="size-1.5 rounded-full bg-foreground/45" />
-            Field notes / 2026
+            个人随记 / 2026
           </div>
 
           <h1 className="mt-6 text-balance text-4xl font-semibold tracking-[-0.065em] text-foreground sm:text-6xl lg:text-7xl">
@@ -70,12 +70,12 @@ export default function Page() {
           <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] border border-border/80 bg-background/65 p-5 shadow-2xl shadow-foreground/10 backdrop-blur-sm">
             <div className="absolute inset-3 rounded-[1.5rem] border border-dashed border-foreground/15" />
             <p className="absolute top-6 left-7 text-[0.6rem] font-medium tracking-[0.2em] text-muted-foreground uppercase">
-              Ahuya&apos;s archive
+              Ahuya 的档案
             </p>
             <HeroCloud />
             <div className="absolute right-3 bottom-3 left-3 border-t border-border/80 bg-background/80 px-4 py-3 text-left backdrop-blur">
               <p className="text-[0.6rem] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                Currently making
+                正在制作
               </p>
               <p className="mt-1 text-sm font-medium">代码、游戏与小工具</p>
             </div>

@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma"
 export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
-  title: "Blog",
+  title: "博客",
   description: "阅读所有文章",
 }
 
@@ -35,12 +35,12 @@ export default async function BlogPage() {
     <main className="mx-auto max-w-5xl px-4 pt-8 pb-24 sm:px-6 sm:pt-16">
       <header className="mb-8 border-b border-border pb-7 sm:mb-10">
         <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
-          Journal
+          文章归档
         </p>
         <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Blog
+              博客
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
               记录开发、设计与日常思考。

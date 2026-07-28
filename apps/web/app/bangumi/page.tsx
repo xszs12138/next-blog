@@ -3,7 +3,7 @@ import { BangumiWidget } from "@/components/BangumiWidget"
 import { getBangumiCollections } from "@/lib/bangumi"
 
 export const metadata: Metadata = {
-  title: "Bangumi",
+  title: "番组",
   description: "我的番组收藏",
 }
 

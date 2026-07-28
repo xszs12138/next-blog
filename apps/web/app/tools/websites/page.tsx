@@ -100,15 +100,9 @@ const categories: Category[] = [
 
 export default function WebsitesPage() {
   return (
-    <main className="mx-auto max-w-4xl px-4 pt-8 pb-24 sm:px-6 sm:pt-16">
+    <main className="mx-auto max-w-4xl px-4 pt-8 pb-10 sm:px-6">
       <header className="mb-10 border-b border-border pb-7 sm:mb-12">
-        <Link
-          href="/tools"
-          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          ← 返回在线功能
-        </Link>
-        <div className="mt-6">
+        <div>
           <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
             Resources
           </p>

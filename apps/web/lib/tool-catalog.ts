@@ -11,6 +11,7 @@ export type ToolFeature = {
   categoryId: ToolCategoryId
   href:
     | "/tools/json-diff"
+    | "/tools/code-comparison"
     | "/tools/json-to-ts"
     | "/tools/color"
     | "/tools/watermark"
@@ -23,6 +24,12 @@ export type ToolFeature = {
 }
 
 export const TOOL_FEATURES: ToolFeature[] = [
+  {
+    categoryId: "development",
+    name: "代码对比分析",
+    description: "逐行查看两段代码的新增与删除，并保留语法高亮",
+    href: "/tools/code-comparison",
+  },
   {
     categoryId: "development",
     name: "JSON 对比",

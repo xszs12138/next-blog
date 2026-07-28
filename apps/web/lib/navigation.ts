@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react"
 import {
   ClapperboardIcon,
+  FilmIcon,
   Grid2X2Icon,
   HomeIcon,
   ImageIcon,
@@ -18,12 +19,13 @@ export type NavigationItem = {
 }
 
 export const ROUTE_LABELS: Record<string, string> = {
-  "/blog": "Blog",
+  "/blog": "博客",
   "/features": "在线功能",
   "/tools": "在线功能",
   ...TOOL_ROUTE_LABELS,
   "/gallery": "图库",
   "/bangumi": "番组",
+  "/movies": "看过的电影",
   "/login": "登录",
   "/signup": "注册",
   "/settings": "设置",
@@ -31,8 +33,8 @@ export const ROUTE_LABELS: Record<string, string> = {
 }
 
 export const PRIMARY_NAVIGATION_ITEMS: NavigationItem[] = [
-  { href: "/", label: "首页", shortLabel: "Home", icon: HomeIcon },
-  { href: "/blog", label: "博客", shortLabel: "Blog", icon: PencilIcon },
+  { href: "/", label: "首页", shortLabel: "首页", icon: HomeIcon },
+  { href: "/blog", label: "博客", shortLabel: "博客", icon: PencilIcon },
 ]
 
 export const TOOL_NAVIGATION_ITEMS: NavigationItem[] = [
@@ -62,6 +64,12 @@ export const MEDIA_NAVIGATION_ITEMS: NavigationItem[] = [
     label: "番组",
     description: "正在追看的动画记录",
     icon: ClapperboardIcon,
+  },
+  {
+    href: "/movies",
+    label: "观影",
+    description: "看过的电影与片单短评",
+    icon: FilmIcon,
   },
 ]
 

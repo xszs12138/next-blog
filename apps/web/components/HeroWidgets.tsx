@@ -18,7 +18,7 @@ export function HeroCloud() {
   )
 }
 
-const texts = ["Gaming", "Coding", "Tools", "All You Need"]
+const texts = ["游戏", "编程", "工具", "所需的一切"]
 
 export function HeroText() {
   return <MorphingText className="font-medium" texts={texts} />
@@ -27,7 +27,7 @@ export function HeroText() {
 export function HeroShinyText() {
   return (
     <ShinyText
-      text="Gaming · Coding · Tools · All You Need"
+      text="游戏 · 编程 · 工具 · 所需的一切"
       speed={3}
       color="var(--muted-foreground)"
       shineColor="var(--foreground)"

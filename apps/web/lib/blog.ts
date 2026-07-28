@@ -3,31 +3,11 @@ import path from "node:path"
 import { cache } from "react"
 import matter from "gray-matter"
 import GithubSlugger from "github-slugger"
+import type { PostMeta, TocItem } from "@/lib/blog-types"
 
-export type PostMeta = {
-  slug: string
-  title: string
-  date: string
-  description: string
-  tags: string[]
-  pinned: boolean
-  image?: string
-}
-
-export type TocItem = {
-  id: string
-  level: number
-  text: string
-}
+export type { PostMeta, TocItem } from "@/lib/blog-types"
 
 const contentDirectory = path.resolve(process.cwd(), "content")
-const postDateFormatter = new Intl.DateTimeFormat("zh-CN", {
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-  timeZone: "Asia/Shanghai",
-})
-
 type PostSource = {
   source: string
   meta: PostMeta
@@ -66,10 +46,6 @@ const getPostSource = cache(async (slug: string): Promise<PostSource | null> => 
 
 export async function postExists(slug: string) {
   return (await getPostSource(slug)) !== null
-}
-
-export function formatPostDate(date: string) {
-  return postDateFormatter.format(new Date(date))
 }
 
 /** Get all posts with frontmatter metadata, sorted by date descending */

@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
 import { XIcon } from "lucide-react"
 
 import { Dialog, DialogContent } from "@workspace/ui/components/dialog"
+import { ImageWithFallback } from "@/components/ImageWithFallback"
 
 type ImagePreviewProps = {
   src: string
@@ -30,12 +30,13 @@ export function ImagePreview({
         onClick={() => setOpen(true)}
         className="cursor-zoom-in overflow-hidden rounded-lg border border-border"
       >
-        <Image
+        <ImageWithFallback
           src={src}
           alt={alt}
           width={width}
           height={height}
           unoptimized
+          containerClassName="block"
           className={className}
         />
       </button>
@@ -51,12 +52,13 @@ export function ImagePreview({
         >
           <XIcon className="size-5" />
         </button>
-        <Image
+        <ImageWithFallback
           src={src}
           alt={alt}
           width={1200}
           height={800}
           unoptimized
+          containerClassName="block"
           className="max-h-[85vh] w-full rounded-lg object-contain"
           sizes="(max-width: 768px) 90vw, 48rem"
         />

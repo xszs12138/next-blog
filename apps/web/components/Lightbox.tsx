@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react"
 import { XIcon, RotateCwIcon, ZoomInIcon, ZoomOutIcon, RotateCcwIcon } from "lucide-react"
 
+import { NativeImageWithFallback } from "@/components/ImageWithFallback"
+
 type LightboxProps = {
   src: string | null
   onClose: () => void
@@ -106,10 +108,10 @@ export function Lightbox({ src, onClose }: LightboxProps) {
       </div>
 
       {/* 图片 */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <NativeImageWithFallback
         src={src}
         alt="预览"
+        containerClassName="max-h-[90vh] max-w-[90vw] rounded-lg"
         className="max-h-[90vh] max-w-[90vw] rounded-lg object-contain transition-transform duration-300"
         style={{
           transform: `rotate(${rotation}deg) scale(${scale})`,

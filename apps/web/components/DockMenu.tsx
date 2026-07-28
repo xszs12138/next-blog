@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react"
 import Link from "next/link"
 import { PanelTopOpenIcon, SearchIcon } from "lucide-react"
 
-import type { PostMeta } from "@/lib/blog"
+import type { PostMeta } from "@/lib/blog-types"
 import { COMPACT_NAVIGATION_ITEMS } from "@/lib/navigation"
 import { cn } from "@workspace/ui/lib/utils"
 import { buttonVariants } from "@workspace/ui/components/button"

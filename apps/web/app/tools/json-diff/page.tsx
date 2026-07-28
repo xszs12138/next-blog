@@ -5,8 +5,7 @@ import { Button } from "@workspace/ui/components/button"
 import { Textarea } from "@workspace/ui/components/textarea"
 import { CheckIcon, CopyIcon } from "lucide-react"
 import { ToolPageHeader } from "@/components/ToolPageHeader"
-
-type DiffLine = { text: string; type: "same" | "added" | "removed" }
+import { diffLines } from "@/lib/line-diff"
 
 function formatJson(obj: unknown, indent = 0): string[] {
   const pad = "  ".repeat(indent)
@@ -40,46 +39,9 @@ function formatJson(obj: unknown, indent = 0): string[] {
   return lines
 }
 
-function diffLines(
-  linesA: string[],
-  linesB: string[]
-): { left: DiffLine[]; right: DiffLine[] } {
-  const m = linesA.length
-  const n = linesB.length
-  const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0))
-
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
-      if (linesA[i - 1] === linesB[j - 1]) {
-        dp[i]![j] = dp[i - 1]![j - 1]! + 1
-      } else {
-        dp[i]![j] = Math.max(dp[i - 1]![j]!, dp[i]![j - 1]!)
-      }
-    }
-  }
-
-  const result: { left: DiffLine[]; right: DiffLine[] } = { left: [], right: [] }
-  let i = m, j = n
-  while (i > 0 || j > 0) {
-    if (i > 0 && j > 0 && linesA[i - 1] === linesB[j - 1]) {
-      result.left.unshift({ text: linesA[i - 1]!, type: "same" })
-      result.right.unshift({ text: linesB[j - 1]!, type: "same" })
-      i--; j--
-    } else if (j > 0 && (i === 0 || dp[i]![j - 1]! >= dp[i - 1]![j]!)) {
-      result.left.unshift({ text: "\xA0", type: "same" })
-      result.right.unshift({ text: linesB[j - 1]!, type: "added" })
-      j--
-    } else {
-      result.left.unshift({ text: linesA[i - 1]!, type: "removed" })
-      result.right.unshift({ text: "\xA0", type: "same" })
-      i--
-    }
-  }
-  return result
-}
-
 function jsonDiff(a: unknown, b: unknown) {
-  return diffLines(formatJson(a), formatJson(b))
+  const result = diffLines(formatJson(a), formatJson(b))
+  return { left: result.before, right: result.after }
 }
 
 const SAMPLE_A = `{
@@ -211,7 +173,7 @@ export default function JsonDiffPage() {
                         : ""
                   }
                 >
-                  {line.text}
+                  {line.placeholder ? "\xA0" : line.text}
                 </div>
               ))}
             </pre>
@@ -227,7 +189,7 @@ export default function JsonDiffPage() {
                         : ""
                   }
                 >
-                  {line.text}
+                  {line.placeholder ? "\xA0" : line.text}
                 </div>
               ))}
             </pre>

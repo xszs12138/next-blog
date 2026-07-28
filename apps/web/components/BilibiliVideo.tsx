@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Image from "next/image"
 import { PlayIcon } from "lucide-react"
+
+import { ImageWithFallback } from "@/components/ImageWithFallback"
 
 type BilibiliVideoProps = {
   bvid: string
@@ -68,11 +69,12 @@ export function BilibiliVideo({ bvid, title }: BilibiliVideoProps) {
           >
             {/* Thumbnail or gradient */}
             {info?.pic ? (
-              <Image
+              <ImageWithFallback
                 src={info.pic}
                 alt={displayTitle ?? ""}
                 fill
                 unoptimized
+                containerClassName="absolute inset-0"
                 className="absolute inset-0 object-cover brightness-50 transition-transform duration-500 group-hover/bili:scale-105"
                 sizes="(max-width: 768px) 100vw, 48rem"
               />
