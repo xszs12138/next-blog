@@ -9,7 +9,12 @@ import { ShareButton } from "@/components/ShareButton"
 import { LicenseNotice } from "@/components/LicenseNotice"
 import { CommentSection } from "@/components/CommentSection"
 import { ViewCounter } from "@/components/ViewCounter"
-import { getPostToc, postExists, getAllPosts, getPostMeta } from "@/lib/blog"
+import {
+  formatPostDate,
+  getAllPosts,
+  getPostMeta,
+  getPostToc,
+} from "@/lib/blog"
 
 type PageProps = {
   params: Promise<{ slug: string }>
@@ -43,12 +48,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function Page({ params }: PageProps) {
   const { slug } = await params
-  if (!(await postExists(slug))) notFound()
+  const meta = await getPostMeta(slug)
+  if (!meta) notFound()
 
-  const [{ default: Post }, toc, meta] = await Promise.all([
+  const [{ default: Post }, toc] = await Promise.all([
     import(`@/content/${slug}.mdx`),
     getPostToc(slug),
-    getPostMeta(slug),
   ])
 
   return (
@@ -58,7 +63,7 @@ export default async function Page({ params }: PageProps) {
           {/* Post header */}
           <header className="mb-6 sm:mb-8">
             {/* Cover image */}
-            {meta?.image && (
+            {meta.image && (
               <div className="relative -mx-6 -mt-6 mb-6 aspect-video w-[calc(100%+3rem)] overflow-hidden rounded-t-xl border-b border-border sm:-mx-8 sm:-mt-8 sm:mb-8 sm:w-[calc(100%+4rem)]">
                 <PixelImage
                   src={meta.image}
@@ -69,34 +74,28 @@ export default async function Page({ params }: PageProps) {
             )}
 
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-              {meta?.title ?? slug}
+              {meta.title}
             </h1>
-            {meta?.description && (
+            {meta.description && (
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed sm:mt-3">
                 {meta.description}
               </p>
             )}
             <div className="flex flex-wrap items-center gap-4 mt-4">
-              {meta?.date && (
+              {meta.date && (
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <CalendarIcon className="size-3.5" />
-                  <time dateTime={meta.date}>
-                    {new Date(meta.date).toLocaleDateString("zh-CN", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </time>
+                  <time dateTime={meta.date}>{formatPostDate(meta.date)}</time>
                 </div>
               )}
               <ViewCounter slug={slug} />
-              {meta?.pinned && (
+              {meta.pinned && (
                 <span className="inline-flex items-center gap-0.5 text-sm text-rose-500">
                   <PinIcon className="size-3.5" />
                   置顶
                 </span>
               )}
-              {meta?.tags && meta.tags.length > 0 && (
+              {meta.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {meta.tags.map((tag) => (
                     <span

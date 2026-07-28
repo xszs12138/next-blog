@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState } from "react"
 import Link from "next/link"
-import { HomeIcon, PencilIcon, SearchIcon, WrenchIcon, ClapperboardIcon, ImageIcon, PanelTopOpenIcon } from "lucide-react"
+import { PanelTopOpenIcon, SearchIcon } from "lucide-react"
 
 import type { PostMeta } from "@/lib/blog"
+import { COMPACT_NAVIGATION_ITEMS } from "@/lib/navigation"
 import { cn } from "@workspace/ui/lib/utils"
 import { buttonVariants } from "@workspace/ui/components/button"
 import { Separator } from "@workspace/ui/components/separator"
@@ -18,16 +19,6 @@ import { Dock, DockIcon } from "@workspace/ui/components/dock"
 import { PostSearch } from "@/components/PostSearch"
 
 export type IconProps = React.HTMLAttributes<SVGElement>
-
-const DATA = {
-  navbar: [
-    { href: "/", icon: HomeIcon, label: "Home" },
-    { href: "/blog", icon: PencilIcon, label: "Blog" },
-    { href: "/tools", icon: WrenchIcon, label: "在线功能" },
-    { href: "/gallery", icon: ImageIcon, label: "图库" },
-    { href: "/bangumi", icon: ClapperboardIcon, label: "番组" },
-  ],
-}
 
 type DockMenuProps = {
   posts: PostMeta[]
@@ -60,13 +51,13 @@ export function DockMenu({ posts, active, onShowHeader }: DockMenuProps) {
             !active && "!hidden"
           )}
         >
-          {DATA.navbar.map((item) => (
-            <DockIcon key={item.label}>
+          {COMPACT_NAVIGATION_ITEMS.map((item) => (
+            <DockIcon key={item.href}>
               <Tooltip>
                 <TooltipTrigger>
                   <Link
                     href={item.href}
-                    aria-label={item.label}
+                    aria-label={item.shortLabel ?? item.label}
                     className={cn(
                       buttonVariants({ variant: "ghost", size: "icon" }),
                       "size-10 rounded-full sm:size-12"
@@ -76,7 +67,7 @@ export function DockMenu({ posts, active, onShowHeader }: DockMenuProps) {
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{item.label}</p>
+                  <p>{item.shortLabel ?? item.label}</p>
                 </TooltipContent>
               </Tooltip>
             </DockIcon>

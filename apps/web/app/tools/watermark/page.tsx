@@ -4,12 +4,11 @@ import { useState, useRef, useCallback, useEffect } from "react"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
 import {
-  ArrowLeftIcon,
   UploadIcon,
   DownloadIcon,
   TrashIcon,
 } from "lucide-react"
-import Link from "next/link"
+import { ToolPageHeader } from "@/components/ToolPageHeader"
 
 type Position = "center" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight" | "tile"
 
@@ -162,19 +161,10 @@ export default function WatermarkPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-4 pt-8 pb-20 sm:px-6 sm:pt-16 sm:pb-24">
-      <Link
-        href="/tools"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeftIcon className="size-3" /> 返回工具列表
-      </Link>
-
-      <header className="mt-4 mb-8">
-        <h1 className="text-xl font-semibold">图片水印</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          给图片添加文字水印，所有处理均在本地完成，不会上传到服务器
-        </p>
-      </header>
+      <ToolPageHeader
+        title="图片水印"
+        description="给图片添加文字水印，所有处理均在本地完成，不会上传到服务器"
+      />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         {/* Preview */}

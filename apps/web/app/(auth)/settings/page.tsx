@@ -21,6 +21,10 @@ export default function SettingsPage() {
     }
   }, [session])
 
+  useEffect(() => {
+    if (!isPending && !session) router.replace("/login")
+  }, [isPending, router, session])
+
   if (isPending) {
     return (
       <div className="text-center text-muted-foreground">加载中...</div>
@@ -28,7 +32,6 @@ export default function SettingsPage() {
   }
 
   if (!session) {
-    router.push("/login")
     return null
   }
 

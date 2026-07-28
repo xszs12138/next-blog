@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Script from "next/script"
 import NextTopLoader from "nextjs-toploader"
 
 import "@workspace/ui/globals.css"
@@ -48,7 +49,11 @@ export default async function RootLayout({
       className={cn("antialiased", "font-sans")}
     >
       <body className="min-h-svh bg-background pt-14 text-foreground">
-        <script dangerouslySetInnerHTML={{ __html: themeInitializationScript }} />
+        <Script
+          id="theme-initializer"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: themeInitializationScript }}
+        />
         <NextTopLoader
           color="#22c55e"
           height={3}

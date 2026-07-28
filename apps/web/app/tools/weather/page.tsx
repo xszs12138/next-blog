@@ -1,10 +1,10 @@
 "use client"
 
+import dynamic from "next/dynamic"
 import { useState } from "react"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
 import {
-  ArrowLeftIcon,
   SearchIcon,
   Loader2Icon,
   MapPinIcon,
@@ -21,16 +21,11 @@ import {
   CloudFogIcon,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import Link from "next/link"
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts"
+import { ToolPageHeader } from "@/components/ToolPageHeader"
+
+const WeatherChart = dynamic(() => import("@/components/WeatherChart"), {
+  ssr: false,
+})
 
 interface GeoResult {
   lat: string
@@ -111,6 +106,10 @@ export default function WeatherPage() {
   }
 
   const current = weather?.current_condition[0]
+  const hourlyTemperatures = weather?.weather[0]?.hourly.map((hour, index) => ({
+    time: `${index}:00`,
+    temp: Number.parseFloat(hour.tempC),
+  }))
 
   const DAY_NAMES = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"]
 
@@ -127,7 +126,8 @@ export default function WeatherPage() {
   }
 
   function formatDate(dateStr: string) {
-    const d = new Date(dateStr)
+    const [year, month, day] = dateStr.split("-").map(Number)
+    const d = new Date(year!, month! - 1, day!)
     return {
       day: DAY_NAMES[d.getDay()] ?? "",
       date: `${d.getMonth() + 1}/${d.getDate()}`,
@@ -136,19 +136,10 @@ export default function WeatherPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-4 pt-8 pb-20 sm:px-6 sm:pt-16 sm:pb-24">
-      <Link
-        href="/tools"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeftIcon className="size-3" /> 返回工具列表
-      </Link>
-
-      <header className="mt-4 mb-8">
-        <h1 className="text-xl font-semibold">天气查询</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          输入城市名称查询天气和位置，数据仅供参考
-        </p>
-      </header>
+      <ToolPageHeader
+        title="天气查询"
+        description="输入城市名称查询天气和位置，数据仅供参考"
+      />
 
       <form onSubmit={search} className="flex gap-2 mb-6">
         <Input
@@ -234,50 +225,11 @@ export default function WeatherPage() {
           )}
 
           {/* Temperature chart */}
-          {weather.weather[0] && (
+          {hourlyTemperatures && (
             <div className="rounded-lg border p-4">
               <h3 className="text-sm font-medium mb-3">24 小时温度趋势</h3>
               <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={weather.weather[0].hourly.map((h, i) => ({
-                      time: `${i}:00`,
-                      temp: parseFloat(h.tempC),
-                    }))}
-                    margin={{ top: 5, right: 10, left: -10, bottom: 0 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                    <XAxis
-                      dataKey="time"
-                      tick={{ fontSize: 10 }}
-                      tickLine={false}
-                      axisLine={false}
-                      interval={3}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 10 }}
-                      tickLine={false}
-                      axisLine={false}
-                      unit="°"
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: "8px",
-                        border: "1px solid hsl(var(--border))",
-                        background: "hsl(var(--background))",
-                        fontSize: "12px",
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="temp"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth={2}
-                      dot={false}
-                      activeDot={{ r: 4 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                <WeatherChart data={hourlyTemperatures} />
               </div>
             </div>
           )}

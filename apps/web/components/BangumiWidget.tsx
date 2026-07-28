@@ -1,25 +1,7 @@
-"use client"
-
-import { useEffect, useState } from "react"
 import Link from "next/link"
 import { ClapperboardIcon, ExternalLinkIcon, StarIcon } from "lucide-react"
 
-interface Subject {
-  subject_id: number
-  subject_type: number
-  type: number
-  rate: number
-  updated_at: string
-  subject: {
-    name: string
-    name_cn: string
-    images: { medium: string; large: string }
-    score: number
-    type: number
-    tags: Array<{ name: string; count: number }>
-    date: string
-  }
-}
+import type { BangumiCollections } from "@/lib/bangumi"
 
 const TYPE_LABELS: Record<number, string> = {
   1: "想看",
@@ -37,45 +19,10 @@ const TYPE_COLORS: Record<number, string> = {
   5: "bg-red-500",
 }
 
-export function BangumiWidget() {
-  const [items, setItems] = useState<Subject[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
+export function BangumiWidget({ collections }: { collections: BangumiCollections | null }) {
+  if (!collections?.data.length) return null
 
-  useEffect(() => {
-    fetch("/api/bangumi")
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.data) {
-          setItems(json.data)
-          setTotal(json.total)
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
-
-  if (loading) {
-    return (
-      <div className="animate-pulse space-y-6">
-        <div className="h-6 w-32 rounded bg-muted" />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="flex gap-3">
-              <div className="h-28 w-20 shrink-0 rounded-lg bg-muted" />
-              <div className="flex-1 space-y-2 py-1">
-                <div className="h-4 w-full rounded bg-muted" />
-                <div className="h-3 w-16 rounded bg-muted" />
-                <div className="h-3 w-24 rounded bg-muted" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  if (!items.length) return null
+  const { data: items, total } = collections
 
   return (
     <div>

@@ -3,8 +3,8 @@
 import { useState, useMemo, useCallback } from "react"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
-import { ArrowLeftIcon, CopyIcon, CheckIcon } from "lucide-react"
-import Link from "next/link"
+import { CheckIcon, CopyIcon } from "lucide-react"
+import { ToolPageHeader } from "@/components/ToolPageHeader"
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   const h = hex.replace("#", "")
@@ -98,19 +98,10 @@ export default function ColorPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 pt-8 pb-20 sm:px-6 sm:pt-16 sm:pb-24">
-      <Link
-        href="/tools"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeftIcon className="size-3" /> 返回工具列表
-      </Link>
-
-      <header className="mt-4 mb-8">
-        <h1 className="text-xl font-semibold">颜色转换</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          颜色选择器，HEX / RGB / HSL 互转
-        </p>
-      </header>
+      <ToolPageHeader
+        title="颜色转换"
+        description="颜色选择器，HEX / RGB / HSL 互转"
+      />
 
       <div className="space-y-6">
         {/* Color preview + picker */}

@@ -4,8 +4,8 @@ import { useState } from "react"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
 import { Card } from "@workspace/ui/components/card"
-import { ArrowLeftIcon, SearchIcon, Loader2Icon } from "lucide-react"
-import Link from "next/link"
+import { Loader2Icon, SearchIcon } from "lucide-react"
+import { ToolPageHeader } from "@/components/ToolPageHeader"
 
 interface IpInfo {
   ip: string
@@ -57,7 +57,7 @@ export default function IpLookupPage() {
     setError("")
     setData(null)
     try {
-      const res = await fetch(`http://ip-api.com/json/${encodeURIComponent(ip)}?lang=zh-CN`)
+      const res = await fetch(`/api/ip-lookup?ip=${encodeURIComponent(ip)}`)
       const json = await res.json()
       if (json.status === "fail") {
         setError(translateError(json.message))
@@ -85,19 +85,10 @@ export default function IpLookupPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 pt-8 pb-20 sm:px-6 sm:pt-16 sm:pb-24">
-      <Link
-        href="/tools"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeftIcon className="size-3" /> 返回工具列表
-      </Link>
-
-      <header className="mt-4 mb-8">
-        <h1 className="text-xl font-semibold">IP 地址查询</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          输入 IP 地址查询地理位置、运营商等信息。结果仅供参考，可能不准确
-        </p>
-      </header>
+      <ToolPageHeader
+        title="IP 地址查询"
+        description="输入 IP 地址查询地理位置、运营商等信息。结果仅供参考，可能不准确"
+      />
 
       <form onSubmit={handleSubmit} className="flex gap-2">
         <Input

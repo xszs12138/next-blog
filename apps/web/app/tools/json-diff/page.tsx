@@ -3,8 +3,8 @@
 import { useState, useMemo } from "react"
 import { Button } from "@workspace/ui/components/button"
 import { Textarea } from "@workspace/ui/components/textarea"
-import { ArrowLeftIcon, CopyIcon, CheckIcon } from "lucide-react"
-import Link from "next/link"
+import { CheckIcon, CopyIcon } from "lucide-react"
+import { ToolPageHeader } from "@/components/ToolPageHeader"
 
 type DiffLine = { text: string; type: "same" | "added" | "removed" }
 
@@ -151,19 +151,11 @@ export default function JsonDiffPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 pt-8 pb-20 sm:px-6 sm:pt-16 sm:pb-24">
-      <Link
-        href="/tools"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeftIcon className="size-3" /> 返回工具列表
-      </Link>
-
-      <header className="mt-4 mb-6">
-        <h1 className="text-xl font-semibold">JSON 对比</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          粘贴两个 JSON，逐行对比差异。绿色=新增，红色=删除
-        </p>
-      </header>
+      <ToolPageHeader
+        title="JSON 对比"
+        description="粘贴两个 JSON，逐行对比差异。绿色=新增，红色=删除"
+        className="mb-6"
+      />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-1.5">

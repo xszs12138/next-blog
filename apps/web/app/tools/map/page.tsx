@@ -3,8 +3,8 @@
 import { useState } from "react"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
-import { ArrowLeftIcon, MapPinIcon } from "lucide-react"
-import Link from "next/link"
+import { MapPinIcon } from "lucide-react"
+import { ToolPageHeader } from "@/components/ToolPageHeader"
 
 export default function MapPage() {
   const [lat, setLat] = useState("")
@@ -34,19 +34,10 @@ export default function MapPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-4 pt-8 pb-20 sm:px-6 sm:pt-16 sm:pb-24">
-      <Link
-        href="/tools"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeftIcon className="size-3" /> 返回工具列表
-      </Link>
-
-      <header className="mt-4 mb-8">
-        <h1 className="text-xl font-semibold">地图定位</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          输入经纬度坐标在地图上显示位置
-        </p>
-      </header>
+      <ToolPageHeader
+        title="地图定位"
+        description="输入经纬度坐标在地图中显示位置"
+      />
 
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2 mb-6">
         <div className="space-y-1.5">

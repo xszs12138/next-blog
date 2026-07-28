@@ -3,8 +3,8 @@
 import { useState, useCallback } from "react"
 import { Button } from "@workspace/ui/components/button"
 import { Textarea } from "@workspace/ui/components/textarea"
-import { ArrowLeftIcon, BracesIcon, CopyIcon, CheckIcon } from "lucide-react"
-import Link from "next/link"
+import { BracesIcon, CheckIcon, CopyIcon } from "lucide-react"
+import { ToolPageHeader } from "@/components/ToolPageHeader"
 
 function inferType(value: unknown): string {
   if (value === null) return "null"
@@ -123,19 +123,10 @@ export default function JsonToTsPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-4 pt-8 pb-20 sm:px-6 sm:pt-16 sm:pb-24">
-      <Link
-        href="/tools"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeftIcon className="size-3" /> 返回工具列表
-      </Link>
-
-      <header className="mt-4 mb-8">
-        <h1 className="text-xl font-semibold">JSON 转 TypeScript 类型</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          将 JSON 数据自动转换为 TypeScript interface 定义。结果仅供参考
-        </p>
-      </header>
+      <ToolPageHeader
+        title="JSON 转 TypeScript 类型"
+        description="将 JSON 数据自动转换为 TypeScript interface 定义。结果仅供参考"
+      />
 
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Input */}

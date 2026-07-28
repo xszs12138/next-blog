@@ -4,16 +4,15 @@ import { Fragment, useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import {
-  ClapperboardIcon,
-  Grid2X2Icon,
-  ImageIcon,
-  PanelBottomOpenIcon,
-  SearchIcon,
-  WrenchIcon,
-} from "lucide-react"
+import { PanelBottomOpenIcon, SearchIcon } from "lucide-react"
 
 import type { PostMeta } from "@/lib/blog"
+import {
+  MEDIA_NAVIGATION_ITEMS,
+  PRIMARY_NAVIGATION_ITEMS,
+  ROUTE_LABELS,
+  TOOL_NAVIGATION_ITEMS,
+} from "@/lib/navigation"
 import { PostSearch } from "@/components/PostSearch"
 import { Button } from "@workspace/ui/components/button"
 import {
@@ -42,63 +41,47 @@ type SiteHeaderProps = {
   onModeChange: (mode: NavigationMode) => void
 }
 
-const ROUTE_LABELS: Record<string, string> = {
-  "/blog": "Blog",
-  "/features": "在线功能",
-  "/tools": "在线功能",
-  "/tools/json-diff": "JSON 对比",
-  "/tools/json-to-ts": "JSON 转 TS 类型",
-  "/tools/color": "颜色转换",
-  "/tools/watermark": "图片水印",
-  "/tools/ip-lookup": "IP 地址查询",
-  "/tools/map": "地图定位",
-  "/tools/weather": "天气查询",
-  "/tools/websites": "常用工具网站链接",
-  "/gallery": "图库",
-  "/bangumi": "番组",
-  "/login": "登录",
-  "/signup": "注册",
-  "/settings": "设置",
-  "/test": "测试页面",
-}
-
-const primaryLinks = [
-  { href: "/", label: "首页" },
-  { href: "/blog", label: "博客" },
-]
-
-const utilityLinks = [
-  {
-    href: "/tools",
-    label: "在线功能",
-    description: "打开即用的小功能集合",
-    icon: WrenchIcon,
-  },
-  {
-    href: "/tools/websites",
-    label: "常用工具网站链接",
-    description: "开发、系统与创作资源",
-    icon: Grid2X2Icon,
-  },
-]
-
-const mediaLinks = [
-  {
-    href: "/gallery",
-    label: "图库",
-    description: "保存的图片与视觉记录",
-    icon: ImageIcon,
-  },
-  {
-    href: "/bangumi",
-    label: "番组",
-    description: "正在追看的动画记录",
-    icon: ClapperboardIcon,
-  },
-]
-
 function isActivePath(pathname: string, href: string) {
   return href === "/" ? pathname === href : pathname.startsWith(href)
+}
+
+function NavigationMenuGroup({
+  active,
+  items,
+  label,
+}: {
+  active: boolean
+  items: typeof TOOL_NAVIGATION_ITEMS
+  label: string
+}) {
+  return (
+    <NavigationMenuItem>
+      <NavigationMenuTrigger className={cn("text-sm", active && "bg-muted/60")}>
+        {label}
+      </NavigationMenuTrigger>
+      <NavigationMenuContent>
+        <ul className="w-72 space-y-1 p-1">
+          {items.map((item) => {
+            const Icon = item.icon
+
+            return (
+              <li key={item.href}>
+                <NavigationMenuLink render={<Link href={item.href} />}>
+                  <Icon className="size-4 text-muted-foreground" />
+                  <span>
+                    <span className="block font-medium">{item.label}</span>
+                    <span className="mt-0.5 block text-xs text-muted-foreground">
+                      {item.description}
+                    </span>
+                  </span>
+                </NavigationMenuLink>
+              </li>
+            )
+          })}
+        </ul>
+      </NavigationMenuContent>
+    </NavigationMenuItem>
+  )
 }
 
 export function SiteHeader({ posts, mode, onModeChange }: SiteHeaderProps) {
@@ -140,7 +123,7 @@ export function SiteHeader({ posts, mode, onModeChange }: SiteHeaderProps) {
             <>
               <NavigationMenu className="ml-auto hidden md:flex">
                 <NavigationMenuList className="gap-2 lg:gap-4">
-                  {primaryLinks.map((item) => (
+                  {PRIMARY_NAVIGATION_ITEMS.map((item) => (
                     <NavigationMenuItem key={item.href}>
                       <NavigationMenuLink
                         render={<Link href={item.href} />}
@@ -151,62 +134,16 @@ export function SiteHeader({ posts, mode, onModeChange }: SiteHeaderProps) {
                       </NavigationMenuLink>
                     </NavigationMenuItem>
                   ))}
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger
-                      className={cn(
-                        "text-sm",
-                        utilityLinks.some((item) => isActivePath(pathname, item.href)) &&
-                          "bg-muted/60"
-                      )}
-                    >
-                      工具
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <ul className="w-72 space-y-1 p-1">
-                        {utilityLinks.map((item) => (
-                          <li key={item.href}>
-                            <NavigationMenuLink render={<Link href={item.href} />}>
-                              <item.icon className="size-4 text-muted-foreground" />
-                              <span>
-                                <span className="block font-medium">{item.label}</span>
-                                <span className="mt-0.5 block text-xs text-muted-foreground">
-                                  {item.description}
-                                </span>
-                              </span>
-                            </NavigationMenuLink>
-                          </li>
-                        ))}
-                      </ul>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger
-                      className={cn(
-                        "text-sm",
-                        mediaLinks.some((item) => isActivePath(pathname, item.href)) &&
-                          "bg-muted/60"
-                      )}
-                    >
-                      收藏
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <ul className="w-72 space-y-1 p-1">
-                        {mediaLinks.map((item) => (
-                          <li key={item.href}>
-                            <NavigationMenuLink render={<Link href={item.href} />}>
-                              <item.icon className="size-4 text-muted-foreground" />
-                              <span>
-                                <span className="block font-medium">{item.label}</span>
-                                <span className="mt-0.5 block text-xs text-muted-foreground">
-                                  {item.description}
-                                </span>
-                              </span>
-                            </NavigationMenuLink>
-                          </li>
-                        ))}
-                      </ul>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
+                  <NavigationMenuGroup
+                    active={TOOL_NAVIGATION_ITEMS.some((item) => isActivePath(pathname, item.href))}
+                    items={TOOL_NAVIGATION_ITEMS}
+                    label="工具"
+                  />
+                  <NavigationMenuGroup
+                    active={MEDIA_NAVIGATION_ITEMS.some((item) => isActivePath(pathname, item.href))}
+                    items={MEDIA_NAVIGATION_ITEMS}
+                    label="收藏"
+                  />
                 </NavigationMenuList>
               </NavigationMenu>
             </>

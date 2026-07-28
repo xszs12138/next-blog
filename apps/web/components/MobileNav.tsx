@@ -2,8 +2,9 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ClapperboardIcon, HomeIcon, ImageIcon, MenuIcon, PencilIcon, WrenchIcon } from "lucide-react"
+import { MenuIcon } from "lucide-react"
 
+import { COMPACT_NAVIGATION_ITEMS } from "@/lib/navigation"
 import { cn } from "@workspace/ui/lib/utils"
 import {
   Sheet,
@@ -13,14 +14,6 @@ import {
 } from "@workspace/ui/components/sheet"
 import { Button, buttonVariants } from "@workspace/ui/components/button"
 import { AnimatedThemeToggler } from "@workspace/ui/components/animated-theme-toggler"
-
-const NAV_ITEMS = [
-  { href: "/", icon: HomeIcon, label: "Home" },
-  { href: "/blog", icon: PencilIcon, label: "Blog" },
-  { href: "/tools", icon: WrenchIcon, label: "在线功能" },
-  { href: "/gallery", icon: ImageIcon, label: "图库" },
-  { href: "/bangumi", icon: ClapperboardIcon, label: "番组" },
-]
 
 export function MobileNav() {
   const [open, setOpen] = useState(false)
@@ -47,7 +40,7 @@ export function MobileNav() {
           </SheetHeader>
 
           <nav className="flex flex-col gap-1">
-            {NAV_ITEMS.map((item) => (
+            {COMPACT_NAVIGATION_ITEMS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -58,7 +51,7 @@ export function MobileNav() {
                 )}
               >
                 <item.icon className="size-5" />
-                {item.label}
+                {item.shortLabel ?? item.label}
               </Link>
             ))}
 

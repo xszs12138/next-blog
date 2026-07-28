@@ -15,7 +15,7 @@ import {
   SearchIcon,
 } from "lucide-react"
 
-import type { PostMeta } from "@/lib/blog"
+import { formatPostDate, type PostMeta } from "@/lib/blog"
 import { Card } from "@workspace/ui/components/card"
 import CountUp from "@workspace/ui/components/CountUp"
 import { Input } from "@workspace/ui/components/input"
@@ -34,14 +34,6 @@ type BlogContentProps = {
 }
 
 type Layout = "grid" | "list"
-
-function formatDate(date: string) {
-  return new Date(date).toLocaleDateString("zh-CN", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
-}
 
 function PostMetaLine({
   post,
@@ -62,7 +54,7 @@ function PostMetaLine({
       )}
       <span className="inline-flex items-center gap-1">
         <CalendarIcon className="size-3" />
-        <time dateTime={post.date}>{formatDate(post.date)}</time>
+        <time dateTime={post.date}>{formatPostDate(post.date)}</time>
       </span>
       {viewCount && viewCount > 0 ? (
         <span className="inline-flex items-center gap-1">
