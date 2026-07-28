@@ -50,7 +50,7 @@ export async function getBangumiCollections(category?: string): Promise<BangumiC
         signal: controller.signal,
       }
     )
-
+    console.log(`Bangumi API 返回 ${response.status} ${response.statusText}`)
     if (!response.ok) {
       throw new BangumiRequestError(
         `Bangumi API 返回 ${response.status}`,
@@ -61,7 +61,8 @@ export async function getBangumiCollections(category?: string): Promise<BangumiC
     return (await response.json()) as BangumiCollections
   } catch (error) {
     if (error instanceof BangumiRequestError) throw error
-
+    console.log("error",error);
+    
     const message = error instanceof Error ? error.message : "请求失败"
     throw new BangumiRequestError(message, 502)
   } finally {

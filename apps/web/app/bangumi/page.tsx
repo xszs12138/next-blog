@@ -10,9 +10,5 @@ export const metadata: Metadata = {
 export default async function BangumiPage() {
   const collections = await getBangumiCollections().catch(() => null)
 
-  return (
-    <main className="mx-auto max-w-3xl px-4 pt-8 pb-20 sm:px-6 sm:pt-16 sm:pb-24">
-      <BangumiWidget collections={collections} />
-    </main>
-  )
+  return <BangumiWidget collections={collections} />
 }

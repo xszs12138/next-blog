@@ -1,7 +1,18 @@
-import Link from "next/link"
-import { ClapperboardIcon, ExternalLinkIcon, StarIcon } from "lucide-react"
+"use client"
 
-import type { BangumiCollections } from "@/lib/bangumi"
+import { useMemo, useState } from "react"
+import Link from "next/link"
+import {
+  ArrowUpRightIcon,
+  ClapperboardIcon,
+  EyeIcon,
+  ListVideoIcon,
+  StarIcon,
+} from "lucide-react"
+
+import OptionWheel from "@workspace/ui/components/OptionWheel"
+import { cn } from "@workspace/ui/lib/utils"
+import type { BangumiCollections, BangumiSubject } from "@/lib/bangumi"
 import { NativeImageWithFallback } from "@/components/ImageWithFallback"
 
 const TYPE_LABELS: Record<number, string> = {
@@ -13,87 +24,229 @@ const TYPE_LABELS: Record<number, string> = {
 }
 
 const TYPE_COLORS: Record<number, string> = {
-  1: "bg-blue-500",
-  2: "bg-green-500",
-  3: "bg-amber-500",
-  4: "bg-gray-400",
-  5: "bg-red-500",
+  1: "bg-sky-400",
+  2: "bg-emerald-400",
+  3: "bg-amber-300",
+  4: "bg-stone-400",
+  5: "bg-rose-400",
 }
 
-export function BangumiWidget({ collections }: { collections: BangumiCollections | null }) {
-  if (!collections?.data.length) return null
+function getTitle(item: BangumiSubject) {
+  return item.subject.name_cn || item.subject.name || "未命名条目"
+}
 
-  const { data: items, total } = collections
+function BangumiEmptyState() {
+  return (
+    <section className="flex min-h-[calc(100svh-3.5rem)] items-center justify-center bg-stone-100 px-4 text-stone-900 dark:bg-[#0d0d0e] dark:text-stone-100">
+      <div className="max-w-sm text-center">
+        <ClapperboardIcon className="mx-auto size-8 text-stone-400 dark:text-stone-500" />
+        <h1 className="mt-5 text-2xl font-semibold tracking-tight">
+          番组收藏暂不可用
+        </h1>
+        <p className="mt-2 text-sm leading-6 text-stone-500 dark:text-stone-400">
+          稍后再试，或检查番组数据源配置。
+        </p>
+      </div>
+    </section>
+  )
+}
+
+export function BangumiWidget({
+  collections,
+}: {
+  collections: BangumiCollections | null
+}) {
+  const items = collections?.data ?? []
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const titles = useMemo(() => items.map(getTitle), [items])
+  const selectedItem = items[selectedIndex] ?? items[0]
+
+  if (!selectedItem) return <BangumiEmptyState />
+
+  const title = getTitle(selectedItem)
+  const originalTitle = selectedItem.subject.name
+  const cover =
+    selectedItem.subject.images.large || selectedItem.subject.images.medium
+  const statusLabel = TYPE_LABELS[selectedItem.type] ?? "收藏"
+  const total = collections?.total ?? items.length
 
   return (
-    <div>
-      <div className="mb-6 flex items-center gap-2">
-        <ClapperboardIcon className="size-5" />
-        <h1 className="text-xl font-semibold">番组收藏</h1>
-        <span className="text-sm text-muted-foreground">共 {total} 部</span>
-        <Link
-          href="https://bangumi.tv/user/681525"
-          target="_blank"
-          className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-        >
-          Bangumi <ExternalLinkIcon className="size-3" />
-        </Link>
+    <section className="relative isolate min-h-[calc(100svh-3.5rem)] overflow-hidden bg-stone-100 text-stone-900 dark:bg-[#0d0d0e] dark:text-stone-100">
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <NativeImageWithFallback
+          src={cover}
+          alt=""
+          containerClassName="absolute inset-0"
+          className="size-full object-cover object-[center_28%] opacity-45 grayscale-[0.15] saturate-[0.7] dark:opacity-55 dark:grayscale-[0.3]"
+          loading="eager"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(245,245,244,0.98)_0%,rgba(245,245,244,0.89)_32%,rgba(245,245,244,0.38)_66%,rgba(245,245,244,0.7)_100%)] dark:bg-[linear-gradient(90deg,rgba(13,13,14,0.98)_0%,rgba(13,13,14,0.9)_34%,rgba(13,13,14,0.24)_68%,rgba(13,13,14,0.68)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_73%_20%,transparent_0%,rgba(28,25,23,0.08)_72%)] dark:bg-[radial-gradient(circle_at_73%_20%,transparent_0%,rgba(0,0,0,0.3)_72%)]" />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((item) => (
+      <div className="relative mx-auto flex min-h-[calc(100svh-3.5rem)] w-full max-w-7xl flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
+        <header className="flex items-center justify-between gap-4">
+          <div className="inline-flex items-center gap-2 text-xs font-medium tracking-[0.16em] text-stone-500 uppercase dark:text-stone-400">
+            <ClapperboardIcon className="size-3.5" />
+            番组收藏
+          </div>
           <Link
-            key={item.subject_id}
-            href={`https://bgm.tv/subject/${item.subject_id}`}
+            href="https://bangumi.tv/user/681525"
             target="_blank"
-            className="group flex gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/50"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-full border border-stone-900/10 bg-white/45 px-3 py-1.5 text-xs font-medium text-stone-600 backdrop-blur transition-colors hover:bg-white/75 hover:text-stone-950 dark:border-white/15 dark:bg-black/20 dark:text-stone-300 dark:hover:bg-black/35 dark:hover:text-white"
           >
-            <div className="relative shrink-0">
-              <NativeImageWithFallback
-                src={item.subject.images.medium}
-                alt={item.subject.name_cn || item.subject.name}
-                containerClassName="h-32 w-24 rounded-md"
-                className="size-full object-cover"
-                loading="lazy"
-              />
+            在 Bangumi 查看
+            <ArrowUpRightIcon className="size-3" />
+          </Link>
+        </header>
+
+        <div className="relative flex flex-1 items-center py-14 sm:py-20 lg:py-24">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-stone-900/10 bg-white/45 px-3 py-1.5 text-xs text-stone-600 backdrop-blur dark:border-white/15 dark:bg-black/20 dark:text-stone-300">
               <span
-                className={[
-                  "absolute top-1 left-1 rounded px-1.5 py-0.5 text-[10px] text-white",
-                  TYPE_COLORS[item.type] ?? "bg-gray-500",
-                ].join(" ")}
-              >
-                {TYPE_LABELS[item.type] ?? "?"}
+                className={cn(
+                  "size-1.5 rounded-full",
+                  TYPE_COLORS[selectedItem.type] ?? "bg-stone-400"
+                )}
+              />
+              {statusLabel}
+              {selectedItem.subject.date ? (
+                <span>· {selectedItem.subject.date.slice(0, 4)}</span>
+              ) : null}
+            </div>
+
+            <h1 className="mt-5 max-w-xl text-4xl font-semibold tracking-[-0.055em] text-balance sm:text-5xl lg:text-7xl">
+              {title}
+            </h1>
+            {originalTitle && originalTitle !== title ? (
+              <p className="mt-3 max-w-lg text-sm tracking-wide text-stone-500 sm:text-base dark:text-stone-400">
+                {originalTitle}
+              </p>
+            ) : null}
+
+            <div className="mt-7 flex flex-wrap gap-2.5 text-sm text-stone-600 dark:text-stone-300">
+              {selectedItem.subject.score > 0 ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-stone-900/10 bg-white/45 px-3 py-1.5 backdrop-blur dark:border-white/15 dark:bg-black/20">
+                  <StarIcon className="size-3.5 fill-amber-400 text-amber-400" />
+                  番组评分 {selectedItem.subject.score.toFixed(1)}
+                </span>
+              ) : null}
+              {selectedItem.rate > 0 ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-stone-900/10 bg-white/45 px-3 py-1.5 backdrop-blur dark:border-white/15 dark:bg-black/20">
+                  <EyeIcon className="size-3.5" />
+                  我的评分 {selectedItem.rate}
+                </span>
+              ) : null}
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-stone-900/10 bg-white/45 px-3 py-1.5 backdrop-blur dark:border-white/15 dark:bg-black/20">
+                <ListVideoIcon className="size-3.5" />
+                已展示 {items.length} / {total} 部
               </span>
             </div>
-            <div className="flex min-w-0 flex-1 flex-col justify-between py-0.5">
-              <div>
-                <p className="font-medium text-sm line-clamp-2 group-hover:text-primary">
-                  {item.subject.name_cn || item.subject.name}
-                </p>
-                {item.subject.name_cn && item.subject.name !== item.subject.name_cn && (
-                  <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
-                    {item.subject.name}
-                  </p>
-                )}
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                {item.subject.score > 0 && (
-                  <span className="inline-flex items-center gap-0.5">
-                    <StarIcon className="size-3 fill-amber-500 text-amber-500" />
-                    {item.subject.score.toFixed(1)}
-                  </span>
-                )}
-                {item.rate > 0 && (
-                  <span>我的评分: {item.rate}</span>
-                )}
-                {item.subject.date && (
-                  <span className="ml-auto">{item.subject.date.slice(0, 4)}</span>
-                )}
-              </div>
+
+            <Link
+              href={`https://bgm.tv/subject/${selectedItem.subject_id}`}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-stone-800 transition-colors hover:text-stone-500 dark:text-stone-100 dark:hover:text-stone-300"
+            >
+              查看条目详情 <ArrowUpRightIcon className="size-4" />
+            </Link>
+          </div>
+
+          <div className="pointer-events-none absolute top-1/2 right-0 hidden h-64 w-[22rem] -translate-y-1/2 lg:block">
+            <div className="absolute top-1/2 right-5 h-20 w-px -translate-y-1/2 bg-stone-900/25 dark:bg-white/30" />
+            <div className="pointer-events-auto h-full dark:hidden">
+              <OptionWheel
+                items={titles}
+                selected={selectedIndex}
+                onChange={(index) => setSelectedIndex(index)}
+                side="right"
+                fontSize={1.1}
+                spacing={2.2}
+                inset={30}
+                curve={0.65}
+                tilt={8}
+                blur={0.65}
+                fade={0.22}
+                minOpacity={0.1}
+                smoothing={150}
+                textColor="rgb(120 113 108)"
+                activeColor="rgb(28 25 23)"
+              />
             </div>
-          </Link>
-        ))}
+            <div className="pointer-events-auto hidden h-full dark:block">
+              <OptionWheel
+                items={titles}
+                selected={selectedIndex}
+                onChange={(index) => setSelectedIndex(index)}
+                side="right"
+                fontSize={1.1}
+                spacing={2.2}
+                inset={30}
+                curve={0.65}
+                tilt={8}
+                blur={0.65}
+                fade={0.22}
+                minOpacity={0.1}
+                smoothing={150}
+                textColor="rgb(168 162 158)"
+                activeColor="rgb(250 250 249)"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="relative -mx-4 mt-auto sm:-mx-6 lg:-mx-10">
+          <div className="flex items-center justify-between px-4 pb-3 sm:px-6 lg:px-10">
+            <p className="text-xs font-medium tracking-[0.16em] text-stone-500 uppercase dark:text-stone-400">
+              作品轨道
+            </p>
+            <p className="text-xs text-stone-500 lg:hidden dark:text-stone-400">
+              左右滑动切换
+            </p>
+          </div>
+          <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-6 [scrollbar-width:none] sm:px-6 lg:px-10 [&::-webkit-scrollbar]:hidden">
+            {items.map((item, index) => {
+              const cardTitle = getTitle(item)
+              const isSelected = index === selectedIndex
+
+              return (
+                <button
+                  key={item.subject_id}
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => setSelectedIndex(index)}
+                  className={cn(
+                    "group relative h-40 w-28 shrink-0 snap-start overflow-hidden rounded-xl border text-left shadow-lg transition duration-300 sm:h-48 sm:w-36",
+                    isSelected
+                      ? "scale-[1.03] border-stone-900/70 ring-2 ring-stone-900/25 dark:border-white/80 dark:ring-white/20"
+                      : "border-stone-900/10 opacity-75 hover:-translate-y-1 hover:opacity-100 dark:border-white/15"
+                  )}
+                >
+                  <NativeImageWithFallback
+                    src={item.subject.images.medium}
+                    alt={cardTitle}
+                    containerClassName="absolute inset-0"
+                    className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent" />
+                  <span
+                    className={cn(
+                      "absolute top-2 left-2 size-1.5 rounded-full",
+                      TYPE_COLORS[item.type] ?? "bg-stone-400"
+                    )}
+                  />
+                  <span className="absolute right-2 bottom-2 left-2 line-clamp-2 text-xs leading-4 font-medium text-white drop-shadow">
+                    {cardTitle}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   )
 }
