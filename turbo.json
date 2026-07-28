@@ -5,6 +5,18 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "env": [
+        "7BU_TOKEN",
+        "BANGUMI_UID",
+        "BETTER_AUTH_SECRET",
+        "BETTER_AUTH_URL",
+        "BILIBILI_ROOM_ID",
+        "DATABASE_URL",
+        "GITHUB_CLIENT_ID",
+        "GITHUB_CLIENT_SECRET",
+        "POSTGRES_PRISMA_URL",
+        "POSTGRES_URL"
+      ],
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
