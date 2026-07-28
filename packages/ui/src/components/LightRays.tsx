@@ -30,8 +30,19 @@ interface LightRaysProps {
 const DEFAULT_COLOR = '#ffffff';
 
 const hexToRgb = (hex: string): [number, number, number] => {
-  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return m ? [parseInt(m[1], 16) / 255, parseInt(m[2], 16) / 255, parseInt(m[3], 16) / 255] : [1, 1, 1];
+  const match = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!match) return [1, 1, 1];
+
+  const [, red, green, blue] = match;
+  if (red === undefined || green === undefined || blue === undefined) {
+    return [1, 1, 1];
+  }
+
+  return [
+    Number.parseInt(red, 16) / 255,
+    Number.parseInt(green, 16) / 255,
+    Number.parseInt(blue, 16) / 255
+  ];
 };
 
 const getAnchorAndDir = (
