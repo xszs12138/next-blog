@@ -1,19 +1,23 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import {
   ArrowUpRightIcon,
   ClapperboardIcon,
   EyeIcon,
   ListVideoIcon,
+  Maximize2Icon,
+  Minimize2Icon,
   StarIcon,
 } from "lucide-react"
 
-import OptionWheel from "@workspace/ui/components/OptionWheel"
 import { cn } from "@workspace/ui/lib/utils"
 import type { BangumiCollections, BangumiSubject } from "@/lib/bangumi"
 import { NativeImageWithFallback } from "@/components/ImageWithFallback"
+import styles from "./BangumiWidget.module.css"
+
+const BACKGROUND_TRANSITION_DURATION = 900
 
 const TYPE_LABELS: Record<number, string> = {
   1: "想看",
@@ -33,6 +37,10 @@ const TYPE_COLORS: Record<number, string> = {
 
 function getTitle(item: BangumiSubject) {
   return item.subject.name_cn || item.subject.name || "未命名条目"
+}
+
+function getCover(item: BangumiSubject) {
+  return item.subject.images.large || item.subject.images.medium
 }
 
 function BangumiEmptyState() {
@@ -58,51 +66,180 @@ export function BangumiWidget({
 }) {
   const items = collections?.data ?? []
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const titles = useMemo(() => items.map(getTitle), [items])
+  const [previousIndex, setPreviousIndex] = useState<number | null>(null)
+  const [slideId, setSlideId] = useState(0)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const [isCinemaMode, setIsCinemaMode] = useState(false)
+  const stageRef = useRef<HTMLElement>(null)
+  const selectedIndexRef = useRef(0)
+
+  const selectItem = useCallback(
+    (nextIndex: number) => {
+      if (nextIndex < 0 || nextIndex >= items.length) return
+      if (nextIndex === selectedIndexRef.current) return
+
+      setPreviousIndex(selectedIndexRef.current)
+      selectedIndexRef.current = nextIndex
+      setSelectedIndex(nextIndex)
+      setSlideId((current) => current + 1)
+    },
+    [items.length]
+  )
+
+  useEffect(() => {
+    if (selectedIndexRef.current < items.length) return
+
+    selectedIndexRef.current = 0
+    setSelectedIndex(0)
+    setPreviousIndex(null)
+    setSlideId((current) => current + 1)
+  }, [items.length])
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)")
+    const updateMotionPreference = () => setPrefersReducedMotion(mediaQuery.matches)
+
+    updateMotionPreference()
+    mediaQuery.addEventListener("change", updateMotionPreference)
+    return () => mediaQuery.removeEventListener("change", updateMotionPreference)
+  }, [])
+
+  useEffect(() => {
+    const updateCinemaMode = () => {
+      setIsCinemaMode(document.fullscreenElement === stageRef.current)
+    }
+
+    updateCinemaMode()
+    document.addEventListener("fullscreenchange", updateCinemaMode)
+    return () => document.removeEventListener("fullscreenchange", updateCinemaMode)
+  }, [])
+
+  useEffect(() => {
+    if (previousIndex === null) return
+
+    const timeout = window.setTimeout(
+      () => setPreviousIndex(null),
+      BACKGROUND_TRANSITION_DURATION
+    )
+    return () => window.clearTimeout(timeout)
+  }, [previousIndex])
+
+  const toggleCinemaMode = useCallback(async () => {
+    const stage = stageRef.current
+    if (!stage) return
+
+    try {
+      if (document.fullscreenElement === stage) {
+        await document.exitFullscreen()
+      } else {
+        await stage.requestFullscreen()
+      }
+    } catch {
+      setIsCinemaMode(false)
+    }
+  }, [])
+
+  const handleBackgroundAnimationEnd = useCallback(() => {
+    if (items.length < 2 || prefersReducedMotion) return
+
+    selectItem((selectedIndexRef.current + 1) % items.length)
+  }, [items.length, prefersReducedMotion, selectItem])
+
   const selectedItem = items[selectedIndex] ?? items[0]
 
   if (!selectedItem) return <BangumiEmptyState />
 
   const title = getTitle(selectedItem)
   const originalTitle = selectedItem.subject.name
-  const cover =
-    selectedItem.subject.images.large || selectedItem.subject.images.medium
+  const cover = getCover(selectedItem)
+  const previousItem = previousIndex === null ? null : items[previousIndex]
   const statusLabel = TYPE_LABELS[selectedItem.type] ?? "收藏"
   const total = collections?.total ?? items.length
 
   return (
-    <section className="relative isolate min-h-[calc(100svh-3.5rem)] overflow-hidden bg-stone-100 text-stone-900 dark:bg-[#0d0d0e] dark:text-stone-100">
+    <section
+      ref={stageRef}
+      className={cn(
+        "relative isolate overflow-hidden bg-stone-100 text-stone-900 dark:bg-[#0d0d0e] dark:text-stone-100",
+        isCinemaMode ? "h-svh" : "min-h-[calc(100svh-3.5rem)]"
+      )}
+    >
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        {previousItem ? (
+          <NativeImageWithFallback
+            key={`previous-${previousItem.subject_id}-${slideId}`}
+            src={getCover(previousItem)}
+            alt=""
+            containerClassName="absolute inset-0 opacity-50 dark:opacity-90"
+            className={cn(
+              "size-full object-cover object-[center_33%] brightness-105 grayscale-[0.1] saturate-[0.78] dark:brightness-110 dark:grayscale-[0.2]",
+              styles.backgroundExit
+            )}
+            loading="eager"
+          />
+        ) : null}
         <NativeImageWithFallback
+          key={`current-${selectedItem.subject_id}-${slideId}`}
           src={cover}
           alt=""
-          containerClassName="absolute inset-0"
-          className="size-full object-cover object-[center_28%] opacity-45 grayscale-[0.15] saturate-[0.7] dark:opacity-55 dark:grayscale-[0.3]"
+          containerClassName="absolute inset-0 opacity-50 dark:opacity-90"
+          className={cn(
+            "size-full object-cover object-[center_33%] brightness-105 grayscale-[0.1] saturate-[0.78] dark:brightness-110 dark:grayscale-[0.2]",
+            styles.backgroundEnter
+          )}
+          onAnimationEnd={handleBackgroundAnimationEnd}
           loading="eager"
         />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(245,245,244,0.98)_0%,rgba(245,245,244,0.89)_32%,rgba(245,245,244,0.38)_66%,rgba(245,245,244,0.7)_100%)] dark:bg-[linear-gradient(90deg,rgba(13,13,14,0.98)_0%,rgba(13,13,14,0.9)_34%,rgba(13,13,14,0.24)_68%,rgba(13,13,14,0.68)_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_73%_20%,transparent_0%,rgba(28,25,23,0.08)_72%)] dark:bg-[radial-gradient(circle_at_73%_20%,transparent_0%,rgba(0,0,0,0.3)_72%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_73%_20%,transparent_0%,rgba(28,25,23,0.05)_72%)] dark:bg-[radial-gradient(circle_at_73%_20%,transparent_0%,rgba(0,0,0,0.2)_72%)]" />
       </div>
 
-      <div className="relative mx-auto flex min-h-[calc(100svh-3.5rem)] w-full max-w-7xl flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
+      <div
+        className={cn(
+          "relative mx-auto flex w-full max-w-7xl flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-10",
+          isCinemaMode ? "min-h-svh" : "min-h-[calc(100svh-3.5rem)]"
+        )}
+      >
         <header className="flex items-center justify-between gap-4">
           <div className="inline-flex items-center gap-2 text-xs font-medium tracking-[0.16em] text-stone-500 uppercase dark:text-stone-400">
             <ClapperboardIcon className="size-3.5" />
             番组收藏
           </div>
-          <Link
-            href="https://bangumi.tv/user/681525"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full border border-stone-900/10 bg-white/45 px-3 py-1.5 text-xs font-medium text-stone-600 backdrop-blur transition-colors hover:bg-white/75 hover:text-stone-950 dark:border-white/15 dark:bg-black/20 dark:text-stone-300 dark:hover:bg-black/35 dark:hover:text-white"
-          >
-            在 Bangumi 查看
-            <ArrowUpRightIcon className="size-3" />
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleCinemaMode}
+              aria-pressed={isCinemaMode}
+              aria-label={isCinemaMode ? "退出电影模式" : "进入电影模式"}
+              title={isCinemaMode ? "退出电影模式" : "进入电影模式"}
+              className="inline-flex items-center gap-1.5 rounded-full border border-stone-900/10 bg-white/45 px-3 py-1.5 text-xs font-medium text-stone-600 backdrop-blur transition-colors hover:bg-white/75 hover:text-stone-950 dark:border-white/15 dark:bg-black/20 dark:text-stone-300 dark:hover:bg-black/35 dark:hover:text-white"
+            >
+              {isCinemaMode ? (
+                <Minimize2Icon className="size-3.5" />
+              ) : (
+                <Maximize2Icon className="size-3.5" />
+              )}
+              <span className="hidden sm:inline">
+                {isCinemaMode ? "退出电影模式" : "电影模式"}
+              </span>
+            </button>
+            <Link
+              href={`https://bgm.tv/subject/${selectedItem.subject_id}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full border border-stone-900/10 bg-white/45 px-3 py-1.5 text-xs font-medium text-stone-600 backdrop-blur transition-colors hover:bg-white/75 hover:text-stone-950 dark:border-white/15 dark:bg-black/20 dark:text-stone-300 dark:hover:bg-black/35 dark:hover:text-white"
+            >
+              查看条目详情
+              <ArrowUpRightIcon className="size-3" />
+            </Link>
+          </div>
         </header>
 
         <div className="relative flex flex-1 items-center py-14 sm:py-20 lg:py-24">
-          <div className="max-w-2xl">
+          <div
+            key={`${selectedItem.subject_id}-${slideId}`}
+            className={cn("max-w-2xl", styles.contentEnter)}
+          >
             <div className="inline-flex items-center gap-2 rounded-full border border-stone-900/10 bg-white/45 px-3 py-1.5 text-xs text-stone-600 backdrop-blur dark:border-white/15 dark:bg-black/20 dark:text-stone-300">
               <span
                 className={cn(
@@ -138,63 +275,10 @@ export function BangumiWidget({
                   我的评分 {selectedItem.rate}
                 </span>
               ) : null}
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-stone-900/10 bg-white/45 px-3 py-1.5 backdrop-blur dark:border-white/15 dark:bg-black/20">
-                <ListVideoIcon className="size-3.5" />
-                已展示 {items.length} / {total} 部
-              </span>
             </div>
 
-            <Link
-              href={`https://bgm.tv/subject/${selectedItem.subject_id}`}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-stone-800 transition-colors hover:text-stone-500 dark:text-stone-100 dark:hover:text-stone-300"
-            >
-              查看条目详情 <ArrowUpRightIcon className="size-4" />
-            </Link>
           </div>
 
-          <div className="pointer-events-none absolute top-1/2 right-0 hidden h-64 w-[22rem] -translate-y-1/2 lg:block">
-            <div className="absolute top-1/2 right-5 h-20 w-px -translate-y-1/2 bg-stone-900/25 dark:bg-white/30" />
-            <div className="pointer-events-auto h-full dark:hidden">
-              <OptionWheel
-                items={titles}
-                selected={selectedIndex}
-                onChange={(index) => setSelectedIndex(index)}
-                side="right"
-                fontSize={1.1}
-                spacing={2.2}
-                inset={30}
-                curve={0.65}
-                tilt={8}
-                blur={0.65}
-                fade={0.22}
-                minOpacity={0.1}
-                smoothing={150}
-                textColor="rgb(120 113 108)"
-                activeColor="rgb(28 25 23)"
-              />
-            </div>
-            <div className="pointer-events-auto hidden h-full dark:block">
-              <OptionWheel
-                items={titles}
-                selected={selectedIndex}
-                onChange={(index) => setSelectedIndex(index)}
-                side="right"
-                fontSize={1.1}
-                spacing={2.2}
-                inset={30}
-                curve={0.65}
-                tilt={8}
-                blur={0.65}
-                fade={0.22}
-                minOpacity={0.1}
-                smoothing={150}
-                textColor="rgb(168 162 158)"
-                activeColor="rgb(250 250 249)"
-              />
-            </div>
-          </div>
         </div>
 
         <div className="relative -mx-4 mt-auto sm:-mx-6 lg:-mx-10">
@@ -206,7 +290,7 @@ export function BangumiWidget({
               左右滑动切换
             </p>
           </div>
-          <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-6 [scrollbar-width:none] sm:px-6 lg:px-10 [&::-webkit-scrollbar]:hidden">
+          <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-6 scrollbar-none sm:px-6 lg:px-10 [&::-webkit-scrollbar]:hidden">
             {items.map((item, index) => {
               const cardTitle = getTitle(item)
               const isSelected = index === selectedIndex
@@ -216,7 +300,7 @@ export function BangumiWidget({
                   key={item.subject_id}
                   type="button"
                   aria-pressed={isSelected}
-                  onClick={() => setSelectedIndex(index)}
+                  onClick={() => selectItem(index)}
                   className={cn(
                     "group relative h-40 w-28 shrink-0 snap-start overflow-hidden rounded-xl border text-left shadow-lg transition duration-300 sm:h-48 sm:w-36",
                     isSelected
@@ -231,7 +315,7 @@ export function BangumiWidget({
                     className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/10 to-transparent" />
                   <span
                     className={cn(
                       "absolute top-2 left-2 size-1.5 rounded-full",

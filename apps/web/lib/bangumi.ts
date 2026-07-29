@@ -34,7 +34,7 @@ export async function getBangumiCollections(category?: string): Promise<BangumiC
 
   const searchParams = new URLSearchParams({ limit: "8" })
   if (category) searchParams.set("subject_type", category)
-
+  console.log(`Fetching Bangumi collections for user ${uid} with params: ${searchParams.toString()}`)
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), 15_000)
 
